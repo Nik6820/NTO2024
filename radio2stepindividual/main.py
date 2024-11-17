@@ -3,6 +3,7 @@ import numpy as np
 string = 'babah'
 def proceed(stri):
     arr = "".join(f"{ord(i):08b}" for i in stri)
+    # че-то я вообще не поняла, во что оно в принципе закодировалось...
     arr = np.array(list(arr))
     print(arr)
     return np.array(arr, dtype = 'bool')
