@@ -1,0 +1,13 @@
+def convert(high, low):
+    a = (f'{high:08b}')[-4:]
+    b = (f'{low:08b}')[-8:]
+    res = a + b
+    temp = 0
+    if res[0] == '0':
+        temp = int(res[1:10], 2) + int(res[10:], 2)/4
+    else: 
+        temp = int(res[1:10], 2) - 512 + (int(res[10:], 2))/4
+    if temp >= -20 and temp <= 80:
+        return "{:.2f}".format(temp)
+    else:
+        return "NaN"
