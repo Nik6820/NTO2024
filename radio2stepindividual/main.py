@@ -347,25 +347,31 @@ def decod(inp, buf, end):
                 mesecc[p//8] = int(out[p:(p+8)], 2)
             corrected_message, corrected_ecc = rs_correct_msg(mesecc, 6)
             
-            if corrected_message == 0:
+            if corrected_message == 0 and (j+73)<len(buf):
                 pass
+            elif corrected_message == 0 and (j+73)>=len(buf):
+                break
             elif ''.join([chr(x) for x in corrected_message[:2]]) == 'zA':
                 st_ind = j + 9*8
                 k = corrected_message[2]
                 n = int(k*11.4//8)
+                break
+            elif corrected_message != 0 and (j+73)>len(buf):
                 break
             else:
                 pass
         if k == 0:
             buf = buf[(st_ind+4):]
             return 'no message found'
+        else:
+            pass
         
         out = ''.join(buf[st_ind:(st_ind+n*8)].astype(int).astype(str).tolist())
         mesecc = [0]*n
         for p in range(0, n*8, 8):
             mesecc[p//8] = int(out[p:(p+8)], 2)
         corrected_message, corrected_ecc = rs_correct_msg(mesecc, n-k)
-        buf = buf[st_ind + (9+n)*8:]
+        buf = buf[st_ind + n*8:]
         return (''.join([chr(x) for x in corrected_message]))
     else:
         return 'no message found'
