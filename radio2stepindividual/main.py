@@ -370,20 +370,22 @@ def decod(inp, buf, end):
     else:
         return 'no message found'
 
+'''{"error": "ControllerError: Error in Controller - Error: System error: list index out of range"}'''
 
-print(decod(pl, buf, 1))
-print(buf)
 
-binary_strings = ['{:08b}'.format(byte) for byte in proceed(input())]
-arr = []
-for i in ''.join(binary_strings):
-    arr += [int(i)]
-arr += [0]
-pl = np.array(arr, bool) 
-print(pl)
+# print(decod(pl, buf, 1))
+# print(buf)
 
-print(decod(pl, buf, 1))
-print(buf)
+# binary_strings = ['{:08b}'.format(byte) for byte in proceed(input())]
+# arr = []
+# for i in ''.join(binary_strings):
+#     arr += [int(i)]
+# arr += [0]
+# pl = np.array(arr, bool) 
+# print(pl)
+
+# print(decod(pl, buf, 1))
+# print(buf)
 
 
 # bah = 'babaaah'
