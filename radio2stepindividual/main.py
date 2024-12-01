@@ -302,13 +302,16 @@ def rs_correct_msg(msg_in, nsym, erase_pos=None):
 
 
 # orbita
-
 def proceed(data: str) -> bytes:
+    gf_exp = [0] * 256   
+    gf_log = [0] * 256
     prim = 0x11d
-    k = len(data)
-    n = int(k*11.4//8)
-    init_tables(prim)
-    out = rs_encode_msg([ord(x) for x in 'zA']+[k], 6) + rs_encode_msg([ord(x) for x in data], n-k) 
+    init_tables(prim) # таблица для быстрого перемножения чиселок из РС
+    k = len(data) # длина строки (технически н-ка из условий орбиты, просто эта буква уже была зарезервирована в кода Рида-Соломона)
+    n = int(k*11.4/8)-1 # 11.4к - количество бит, что мы успеем передать в худшем случае (т.е. всегда успеем). делю нацело, чтобы сообщения были побайтовые (так проще)
+
+    out = rs_encode_msg([ord(x) for x in 'zA'], 6) + rs_encode_msg([ord(x) for x in data], n-k) # вначало добавляю стартовое сообщение (чтоб в случае инверсии первого бита сообщения не поехала вся декодировка) 
+                                                                                                  # мб поменяю на A5 5A и чекну маской, то поменьше памяти занимает
     return bytes(out)
 
 binary_strings = ['{:08b}'.format(byte) for byte in proceed(input())]
@@ -320,58 +323,87 @@ pl = np.array(arr, bool)
 
 buf = np.array([], bool)
 def decod(inp, buf, end):
-    n = 0
-    k = 0
-    buf = np.append(buf, inp)
+    gf_exp = [0] * 256   
+    gf_log = [0] * 256
+    prim = 0x11d
+    init_tables(prim) # таблица для быстрого перемножения чиселок из РС
+
+    k = int(len(buf)/80) # эх эх эх...
+    n = int(k*11.4//8) - 1
+
+    sum = 0                 # ищем конец прошлого сообщения (надо понять, с какого символа в буфер надо вписывать новое)
+    st = 0
+    for i in range(80*k):   # после каждого пакета буду вфигачивать 24 единички, т.к. это дело все в буфере, там ничего не исказится, мы в шоколаде 
+        if buf[i]:          # я не зацикливаю буфер (это все поломает, если захотите узнать что именно - напишите мне, тут долго писать)
+            sum += 1        # но в таком случае есть варик, что в какой-то момент единички не влезут
+        else:               # в этом случае у нас есть проблемы похуже этой)) пока что не разобралась с этим
+            sum = 0
+        if sum == 24:
+            st == i - 24
+            break
+    if sum == 0:
+        st = 0
+    
+    for i in range(len(inp)):
+        buf[i+st] = inp[i]
+    if st == 0:
+        pass
+    else:
+        buf[st+len(inp)] = False
+        for i in range(st+len(inp)+1, st+len(inp)+25):
+            buf[i] = True
     out = ''
 
     st_ind = -1
-    for i in range(len(buf)-72):
-        if buf[i]:
+    for i in range(len(buf)-64): # если предположение о ноликах между пакетами верно, то мы ищем первую единичку
+        if buf[i]:               # (-> понять, где начало сообщения)
             st_ind = i
             break
         else:
             pass
 
 
-    if st_ind == -1 and end:
+    if end: # если буфер пустой, а пакет последний -- выводим пустую строку
         return ''
-    elif st_ind != -1:
-        if st_ind < 3:
+    elif st_ind != -1: 
+        if st_ind < 3: # обезопасились
             st_ind = 3
-        for j in range(st_ind-3, st_ind+3):
-            out = ''.join(buf[j:(j+72)].astype(int).astype(str).tolist())
-            mesecc = [0]*9
+        for j in range(st_ind-3, st_ind+3):                                 # первые биты сообщения могли инверсироваться, т.е. все могло уехать
+            out = ''.join(buf[j:(j+64)].astype(int).astype(str).tolist())   # в 'zA' довольно много единичек, инверсироваться разом все они практически никогда не могут, далеко не уедет
+            mesecc = [0]*8                                                  # так что мы смотрим на три вправо, на три влево, не зашифрован ли где-то там признак начала сообщения
             
-            for p in range(0, 72, 8):
-                mesecc[p//8] = int(out[p:(p+8)], 2)
-            corrected_message, corrected_ecc = rs_correct_msg(mesecc, 6)
+            for p in range(0, 64, 8):
+                mesecc[p//8] = int(out[p:(p+8)], 2)                         # биты в байты и циферки, что РС может понимать
+            corrected_message, corrected_ecc = rs_correct_msg(mesecc, 6)    
             
-            if corrected_message == 0 and (j+73)<len(buf):
-                pass
-            elif corrected_message == 0 and (j+73)>=len(buf):
-                break
-            elif ''.join([chr(x) for x in corrected_message[:2]]) == 'zA':
-                st_ind = j + 9*8
-                k = corrected_message[2]
-                n = int(k*11.4//8)
-                break
-            elif corrected_message != 0 and (j+73)>len(buf):
-                break
+            if corrected_message == 0: # в случае невозможности расшифровать сообщение, РС выводит нолик (если я все верно подредачила в функциях)
+                pass                   # надо будет это все еще прочекать, т.к. оригинальный код много где выводил ошибки, а я пыталась подстроить
+                                       # все из них под вывод информации, которая не сломат орбиту, с дедлайном минут в 10
+            elif ''.join([chr(x) for x in corrected_message]) == 'zA':
+                st_ind = j + 8*8 
+                break # нашли кодовое слово, т.е. нашли начало строки, мы в шоколаде х2
             else:
-                pass
-        if k == 0:
-            buf = buf[(st_ind+4):]
-            return 'no message found'
+                pass # каким-то образом РС не сломался при дешифровке, но на деле это была какая-то бурда, не имеющая отношения к коду. скипаем.
+
+        if corrected_message == 0: #""" не уверена, в каком случае это возможно)) если все равно будет ломаться буфер, возможно, проблема тут """
+            for p in range(st_ind+3, k*80): # тут проблема в том, что если уж мы вообще попали в этот иф, сломаемся в любом случае
+                buf[p-st_ind-3] = buf[p]    # так что пока что так
+            return 'no message found'       # мб подредачу потом этот код потом, подумав немного
         else:
             pass
         
-        out = ''.join(buf[st_ind:(st_ind+n*8)].astype(int).astype(str).tolist())
+        # если с индексам старта была беда, мы не ломаемся, т.к. выше в ифах в тех ситуациях что-то ретюрнули, здесь уже никаких проблем
+        out = ''.join(buf[st_ind:(st_ind+n*8)].astype(int).astype(str).tolist()) 
+        print(out)
         mesecc = [0]*n
         for p in range(0, n*8, 8):
             mesecc[p//8] = int(out[p:(p+8)], 2)
         corrected_message, corrected_ecc = rs_correct_msg(mesecc, n-k)
-        buf = buf[st_ind + n*8:]
+        if corrected_message == 0:
+            return 'no mess'
+
+        for p in range(st_ind+n*8-8, len(buf)):
+            buf[p-st_ind-n*8+8] = buf[p]
         return (''.join([chr(x) for x in corrected_message]))
     else:
         return 'no message found'
