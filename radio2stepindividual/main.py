@@ -2,13 +2,13 @@ import numpy as np
 
 # implemeting Galos Field operations
 
-def gf_add(x, y):
+def gf_add(x, y): # сложение в полях Галуа
     return x ^ y
 
-def gf_sub(x, y):
+def gf_sub(x, y): # вычитание в полях Галуа
     return x ^ y
 
-def gf_mult_noLUT(x, y, prim=0, field_charac_full=256, carryless=True):
+def gf_mult_noLUT(x, y, prim=0, field_charac_full=256, carryless=True): #хрень которая работает
     r = 0
     while y: 
         if y & 1: r = r ^ x if carryless else r + x
@@ -21,7 +21,7 @@ def gf_mult_noLUT(x, y, prim=0, field_charac_full=256, carryless=True):
 gf_exp = [0] * 256
 gf_log = [0] * 256
 
-def init_tables(prim=0x11d):
+def init_tables(prim=0x11d): #таблица логарифмов
     global gf_exp, gf_log
     gf_exp = [0] * 512 # anti-log (exponential) table
     gf_log = [0] * 256 # log table
@@ -34,7 +34,7 @@ def init_tables(prim=0x11d):
 
     return [gf_log, gf_exp]
 
-def gf_mul(x,y):
+def gf_mul(x,y): 
     if x==0 or y==0:
         return 0
     return gf_exp[(gf_log[x]+gf_log[y])%255]
@@ -308,7 +308,7 @@ def proceed(data: str) -> bytes:
     prim = 0x11d
     init_tables(prim) # таблица для быстрого перемножения чиселок из РС
     k = len(data) # длина строки (технически н-ка из условий орбиты, просто эта буква уже была зарезервирована в кода Рида-Соломона)
-    n = int(k*11.4/8)-1 # 11.4к - количество бит, что мы успеем передать в худшем случае (т.е. всегда успеем). делю нацело, чтобы сообщения были побайтовые (так проще)
+    n = int(k*11.4/8)-8 # 11.4к - количество бит, что мы успеем передать в худшем случае (т.е. всегда успеем). делю нацело, чтобы сообщения были побайтовые (так проще)
 
     out = rs_encode_msg([ord(x) for x in 'zA'], 6) + rs_encode_msg([ord(x) for x in data], n-k) # вначало добавляю стартовое сообщение (чтоб в случае инверсии первого бита сообщения не поехала вся декодировка) 
                                                                                                   # мб поменяю на A5 5A и чекну маской, то поменьше памяти занимает
@@ -329,8 +329,8 @@ def decod(inp, buf, end):
     init_tables(prim) # таблица для быстрого перемножения чиселок из РС
 
     k = int(len(buf)/80) # эх эх эх...
-    n = int(k*11.4//8) - 1
-
+    n = int(k*11.4//8) - 8
+# written by hehehaha335 =;)-l<
     sum = 0                 # ищем конец прошлого сообщения (надо понять, с какого символа в буфер надо вписывать новое)
     st = 0
     for i in range(80*k):   # после каждого пакета буду вфигачивать 24 единички, т.к. это дело все в буфере, там ничего не исказится, мы в шоколаде 
@@ -341,17 +341,15 @@ def decod(inp, buf, end):
         if sum == 24:
             st == i - 24
             break
-    if sum == 0:
+    if sum != 24:
         st = 0
     
     for i in range(len(inp)):
         buf[i+st] = inp[i]
-    if st == 0:
-        pass
-    else:
-        buf[st+len(inp)] = False
-        for i in range(st+len(inp)+1, st+len(inp)+25):
-            buf[i] = True
+        
+    buf[st+len(inp)] = False
+    for i in range(st+len(inp)+1, st+len(inp)+25):
+        buf[i] = True    
     out = ''
 
     st_ind = -1
@@ -385,7 +383,7 @@ def decod(inp, buf, end):
             else:
                 pass # каким-то образом РС не сломался при дешифровке, но на деле это была какая-то бурда, не имеющая отношения к коду. скипаем.
 
-        if corrected_message == 0: #""" не уверена, в каком случае это возможно)) если все равно будет ломаться буфер, возможно, проблема тут """
+        if corrected_message != 'zA': #""" не уверена, в каком случае это возможно)) если все равно будет ломаться буфер, возможно, проблема тут """
             for p in range(st_ind+3, k*80): # тут проблема в том, что если уж мы вообще попали в этот иф, сломаемся в любом случае
                 buf[p-st_ind-3] = buf[p]    # так что пока что так
             return 'no message found'       # мб подредачу потом этот код потом, подумав немного
@@ -394,7 +392,6 @@ def decod(inp, buf, end):
         
         # если с индексам старта была беда, мы не ломаемся, т.к. выше в ифах в тех ситуациях что-то ретюрнули, здесь уже никаких проблем
         out = ''.join(buf[st_ind:(st_ind+n*8)].astype(int).astype(str).tolist()) 
-        print(out)
         mesecc = [0]*n
         for p in range(0, n*8, 8):
             mesecc[p//8] = int(out[p:(p+8)], 2)
@@ -402,8 +399,8 @@ def decod(inp, buf, end):
         if corrected_message == 0:
             return 'no mess'
 
-        for p in range(st_ind+n*8-8, len(buf)):
-            buf[p-st_ind-n*8+8] = buf[p]
+        for p in range(st_ind+n*8, len(buf)):
+            buf[p-st_ind-n*8] = buf[p]
         return (''.join([chr(x) for x in corrected_message]))
     else:
         return 'no message found'
