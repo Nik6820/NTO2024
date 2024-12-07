@@ -1,15 +1,18 @@
-let transmitter;
-let receiver;
+var transmitter;
+var receiver;
+var count=0;
+var trans = new Uint8Array(22);
 
-function setup() {
+function setup() 
+{
   transmitter = spacecraft.devices[0].functions[0];
   receiver = spacecraft.devices[1].functions[0];
-  let count=0;
-  let trans = new Uint8Array(20);
 }
-function loop() {
+function loop() 
+{
   let packet = receiver.receive(20);
-  if (count%3 === 0){
+  if (count%3 === 0)
+  {
     let trans=packet;
   }
   transmitter.transmit(trans);
