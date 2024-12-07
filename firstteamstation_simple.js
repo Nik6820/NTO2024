@@ -16,7 +16,7 @@ function loop()
   packet = receiver.receive(20);
   if (count%3 === 0)
   {
-    for (i in packet) 
+    for (let i = 0, i < 20, i++) 
     {
       trans[i] = packet[i];
     }
