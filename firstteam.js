@@ -29,7 +29,7 @@ var buf = new Array();
 var trans = new Uint8Array(22);
 var message;
 // transmit
-var sent = 0
+var sent = 0;
 
 function anglength (phix, phiin, lambdax, lambdain)
 {
@@ -72,12 +72,12 @@ function loop()
   ang_speed_x = anglefromgyro(rot_speed_x[0],rot_speed_x[1]);
   err=0-ang_speed_x;
   P=err*kp;
-  u=P+I
+  u=P+I;
   if (u == minmax(u, -umax, umax)){
-    I = I + err*ki*ts
-    I=I*kp
+    I = I + err*ki*ts;
+    I=I*kp;
   }
-  u = minmax(u, -umax, umax)
+  u = minmax(u, -umax, umax);
   wheels.functions[0].motor_torque = u;
   //end stab
   coords=nav.location(3);
@@ -124,7 +124,7 @@ function loop()
             { 
               message[i] = mess[1][i];
             }
-            buf.push(message)
+            buf.push(message);
           }        
         }
      }
@@ -135,8 +135,7 @@ function loop()
      if (anglength(phi, Honkong[0], lambda, Honkong[1])<15.5 && sent < buf.length && Math.abs(ang_speed_x) < 0.0003)
      {
         transmitter.transmit(buf[sent]);
-        sent++
+        sent++;
      }
   }
 }
-
