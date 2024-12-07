@@ -6,17 +6,28 @@ var gyros;
 var nav;
 var transmitter;
 var receiver;
+//PID and coords
 let kp=-1;
 let ki=1;
 let ts=0.01;
 let LaKyaka=[-22.1023, 294.40701-180];
 let Honkong=[22.28552, 114.15769-180];
+let coords;
+let lambda;
+let phi;
 let umax=0.0001;
 let I=0;
+let rot_speed_x;
+let ang_speed_x;
+let err;
+let P;
+let u;
 // recieve
+var packet;
 var mess = [new Array(22), new Array(22), new Array(22)];
 var buf = new Array();
 var trans = new Uint8Array(22);
+var message;
 // transmit
 var sent = 0
 
@@ -57,11 +68,11 @@ function setup()
 function loop() 
 {
   //start stab
-  let rot_speed_x = gyros.functions[0].read(2);
-  let ang_speed_x = anglefromgyro(rot_speed_x[0],rot_speed_x[1]);
-  let err=0-ang_speed_x;
-  let P=err*kp;
-  let u=P+I
+  rot_speed_x = gyros.functions[0].read(2);
+  ang_speed_x = anglefromgyro(rot_speed_x[0],rot_speed_x[1]);
+  err=0-ang_speed_x;
+  P=err*kp;
+  u=P+I
   if (u == minmax(u, -umax, umax)){
     I = I + err*ki*ts
     I=I*kp
@@ -69,15 +80,15 @@ function loop()
   u = minmax(u, -umax, umax)
   wheels.functions[0].motor_torque = u;
   //end stab
-  let coords=nav.location(3);
-  let phi=coords[0];
-  let lambda=coords[1]-180;
+  coords=nav.location(3);
+  phi=coords[0];
+  lambda=coords[1]-180;
   ////////// RECIEVER ///////////
   if (Math.abs(phi-LaKyaka[0])<20 && Math.abs(lambda-LaKyaka[1])<20)
   {
      if (anglength(phi, LaKyaka[0], lambda, LaKyaka[1])<15.5 && buf.length < 51000 && Math.abs(ang_speed_x) < 0.0003)
      {
-        let packet = receiver.receive(26);
+        packet = receiver.receive(26);
       
         // проверка помех в данных о пакете
         
@@ -103,7 +114,7 @@ function loop()
         mess[(trans[20])] = trans;
         if (trans[20] === 3 && mess[0][21] === mess[1][21] && mess[1][21] === mess[2][21]) 
         {
-          let message = new Array(20);
+          message = new Array(20);
           for (let i = 0; i < 20; i++)
           {
             if (mess[0][i] === mess[1][i] || mess[0][i] === mess[2][i]) 
