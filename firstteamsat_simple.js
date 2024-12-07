@@ -21,17 +21,16 @@ function loop()
 
   // проверка помех в данных о пакете
   
-  if (packet[20] === packet[21] || packet[20] === packet[22]) 
+  if (packet[20] !== packet[21] && packet[20] !== packet[22]) 
   {
-  } else
-  { 
     packet[20] = packet[21];
-  }
-  
+  } 
+
   if (packet[23] === packet[24] || packet[23] === packet[25]) 
   {
     packet[21] = packet[23];
-  } else
+  } 
+  else
   { 
     packet[21] = packet[24];
   }
