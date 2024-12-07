@@ -60,7 +60,7 @@ function setup()
 {
   transmitter = spacecraft.devices[0].functions[0];
   receiver = spacecraft.devices[1].functions[0];
-  nav = spacecraft.devices[3];
+  nav = spacecraft.devices[3].functions[0];
   wheels = spacecraft.devices[4];
   gyros = spacecraft.devices[5];
 }
@@ -80,7 +80,7 @@ function loop()
   u = minmax(u, -umax, umax);
   wheels.functions[0].motor_torque = u;
   //end stab
-  coords=nav.location(3);
+  coords=nav.location;
   phi=coords[0];
   lambda=coords[1]-180;
   ////////// RECIEVER ///////////
