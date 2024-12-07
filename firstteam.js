@@ -71,7 +71,7 @@ function loop()
   //end stab
   let coords=nav.location(3);
   let phi=coords[0];
-  let lambda=coords[1];
+  let lambda=coords[1]-180;
   ////////// RECIEVER ///////////
   if (Math.abs(phi-LaKyaka[0])<20 && Math.abs(lambda-LaKyaka[1])<20)
   {
