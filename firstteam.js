@@ -13,13 +13,21 @@ let ts=0;
 let umax=0.0001; //беда какая то, какой максимум?
 let I=0;
 
+function anglength (phix, phiin, lambdax, lambdain)
+{
+   let cos = Math.sin(phix/180*Math.PI) * Math.sin(phiin/180*Math.PI) + Math.cos(phix/180*Math.PI) * Math.cos(phiin/180*Math.PI) * Math.cos((lambdax - lambdain)/180*Math.PI);
+   return Math.acos(cos)*180/Math.PI;
+}
 
-function minmax (a,min,max){
+
+function minmax (a,min,max)
+{
     return(Math.min(Math.max(a, min), max));
 }
 
-function anglefromgyro(highByte, lowByte) {
-let combined = (highByte << 8) | lowByte;
+function anglefromgyro(highByte, lowByte) 
+{
+    let combined = (highByte << 8) | lowByte;
 
     if (combined >= 32768) {
         combined -= 65536;
@@ -30,7 +38,8 @@ let combined = (highByte << 8) | lowByte;
     return speed;
 }
  
-function setup() {
+function setup() 
+{
   transmitter = spacecraft.devices[0].functions[0];
   receiver = spacecraft.devices[1].functions[0];
   nav = spacecraft.devices[3];
@@ -38,7 +47,8 @@ function setup() {
   gyros = spacecraft.devices[5];
 }
  
-function loop() {
+function loop() 
+{
   //start stab
   let rot_speed_x = gyros.functions[0].read(2);
   let ang_speed_x = anglefromgyro(rot_speed_x[0],rot_speed_x[1]);
