@@ -13,6 +13,12 @@ let LaKyaka=[-22.1023, 294.40701-180];
 let Honkong=[22.28552, 114.15769-180];
 let umax=0.0001;
 let I=0;
+// recieve
+var mess = [new Array(22), new Array(22), new Array(22)];
+var buf = new Array();
+var trans = new Uint8Array(22);
+// transmit
+var sent = 0
 
 function anglength (phix, phiin, lambdax, lambdain)
 {
@@ -66,20 +72,59 @@ function loop()
   let coords=nav.location(3);
   let phi=coords[0];
   let lambda=coords[1];
+  ////////// RECIEVER ///////////
   if (Math.abs(phi-LaKyaka[0])<20 && Math.abs(lambda-LaKyaka[1])<20)
   {
-     if (anglength(phi, LaKyaka[0], lambda, LaKyaka[1])<15.5)
+     if (anglength(phi, LaKyaka[0], lambda, LaKyaka[1])<15.5 && buf.length < 51000 /*&& скорость*/)
      {
-        let received_packet = receiver.receive(26);//тут прием и проверка пакетов
+        let packet = receiver.receive(26);
+      
+        // проверка помех в данных о пакете
         
+        if (packet[20] !== packet[21] && packet[20] !== packet[22]) 
+        {
+          packet[20] = packet[21];
+        } 
+      
+        if (packet[23] === packet[24] || packet[23] === packet[25]) 
+        {
+          packet[21] = packet[23];
+        } 
+        else
+        { 
+          packet[21] = packet[24];
+        }
+        // конец проверки
+        
+        for (i in packet.slice(0, 22)) // сохраняю данные без повторов
+        {
+          trans[i] = packet[i];
+        }
+        mess[(trans[20])] = trans;
+        if (trans[20] === 3 && mess[0][21] === mess[1][21] && mess[1][21] === mess[2][21]) 
+        {
+          let message = new Array(20);
+          for (let i = 0; i < 20; i++)
+          {
+            if (mess[0][i] === mess[1][i] || mess[0][i] === mess[2][i]) 
+            {
+              message[i] = mess[0][i];
+            } else
+            { 
+              message[i] = mess[1][i];
+            }
+            buf.push(message)
+          }        
+        }
      }
   }
+  ///////// TRANSMITTER //////////
   if (Math.abs(phi-Honkong[0])<20 && Math.abs(lambda-Honkong[1])<20)
   {
-     if (anglength(phi, Honkong[0], lambda, Honkong[1])<15.5)
+     if (anglength(phi, Honkong[0], lambda, Honkong[1])<15.5 && sent < buf.length /* && скорость */)
      {
-        transmitter.transmit(received_packet);//тут отправка пакетов
-        
+        transmitter.transmit(buf[sent]);
+        sent++
      }
   }
 }
