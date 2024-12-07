@@ -19,10 +19,9 @@ function loop()
       trans[i] = packet[i];
     }
     num += 1
-    trans[20] = trans[21] = trans[22] = count%3;
-    trans[23] = trans[24] = trans[25] = num;
   }
-  
+  trans[20] = trans[21] = trans[22] = count%3;
+  trans[23] = trans[24] = trans[25] = num;  
   count = count + 1;
   transmitter.transmit(trans);
 }
