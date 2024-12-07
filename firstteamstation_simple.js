@@ -1,7 +1,7 @@
 var transmitter;
 var receiver;
 var count=0;
-var trans = new Uint8Array(24);
+var trans = new Uint8Array(26);
 var num=0;
 
 function setup() 
@@ -19,8 +19,8 @@ function loop()
       trans[i] = packet[i];
     }
     num += 1
-    trans[20] = trans[21] = count%3;
-    trans[22] = trans[23] = num;
+    trans[20] = trans[21] = trans[22] = count%3;
+    trans[23] = trans[24] = trans[25] = num;
   }
   
   count = count + 1;
