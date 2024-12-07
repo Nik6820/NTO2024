@@ -75,7 +75,7 @@ function loop()
   ////////// RECIEVER ///////////
   if (Math.abs(phi-LaKyaka[0])<20 && Math.abs(lambda-LaKyaka[1])<20)
   {
-     if (anglength(phi, LaKyaka[0], lambda, LaKyaka[1])<15.5 && buf.length < 51000 /*&& скорость*/)
+     if (anglength(phi, LaKyaka[0], lambda, LaKyaka[1])<15.5 && buf.length < 51000 && Math.abs(ang_speed_x) < 0.0003)
      {
         let packet = receiver.receive(26);
       
@@ -121,7 +121,7 @@ function loop()
   ///////// TRANSMITTER //////////
   if (Math.abs(phi-Honkong[0])<20 && Math.abs(lambda-Honkong[1])<20)
   {
-     if (anglength(phi, Honkong[0], lambda, Honkong[1])<15.5 && sent < buf.length /* && скорость */)
+     if (anglength(phi, Honkong[0], lambda, Honkong[1])<15.5 && sent < buf.length && Math.abs(ang_speed_x) < 0.0003)
      {
         transmitter.transmit(buf[sent]);
         sent++
