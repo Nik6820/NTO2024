@@ -18,9 +18,16 @@ function minmax (a,min,max){
     return(Math.min(Math.max(a, min), max));
 }
 
-function anglefromgyro(bytes){
-//code from lex
-  return 0;
+function anglefromgyro(highByte, lowByte) {
+let combined = (highByte << 8) | lowByte;
+
+    if (combined >= 32768) {
+        combined -= 65536;
+    }
+
+    let speed = combined / 16.0;
+
+    return speed;
 }
  
 function setup() {
@@ -34,7 +41,7 @@ function setup() {
 function loop() {
   //start stab
   let rot_speed_x = gyros.functions[0].read(2);
-  let ang_speed_x = anglefromgyro(rot_speed_x);
+  let ang_speed_x = anglefromgyro(rot_speed_x[0],rot_speed_x[1]);
   let err=0-ang_speed_x;
   let P=err*kp;
   let u=P+I
