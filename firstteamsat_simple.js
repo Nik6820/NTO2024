@@ -1,10 +1,8 @@
 var transmitter;
 var receiver;
-var count=0;
 var trans = new Uint8Array(22);
-var num=0;
 
-var mess = new Array(3);
+var mess = [new Array(22), new Array(22), new Array(22)];
 var buf = new Array();
 
 function setup() 
@@ -57,7 +55,7 @@ function loop()
     }
   //////////////////////////////
   // TRANSMIT
-    
-  
-  transmitter.transmit(trans);
+
+  transmitter.transmit(buf[sent]);
+  sent++
 }
