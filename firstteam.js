@@ -36,7 +36,7 @@ function anglefromgyro(highByte, lowByte)
 
     let speed = combined / 16.0;
 
-    return speed;
+    return speed/180*Math.PI;
 }
  
 function setup() 
