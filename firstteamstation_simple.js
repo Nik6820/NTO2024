@@ -1,8 +1,8 @@
 var transmitter;
 var receiver;
-let count=0;
-let trans = new Uint8Array(24);
-let num=0;
+var count=0;
+var trans = new Uint8Array(24);
+var num=0;
 
 function setup() 
 {
@@ -14,13 +14,14 @@ function loop()
   let packet = receiver.receive(20);
   if (count%3 === 0)
   {
-    let trans=packet;
+    for (i in packet) {
+      trans[i] = packet[i];
+    }
     num += 1
-    trans[20] = count%3;
-    trans[21] = count%3;
-    trans[22] = num;
-    trans[23] = num;
+    trans[20] = trans[21] = count%3;
+    trans[22] = trans[23] = num;
   }
-  transmitter.transmit(trans);
+  
   count = count + 1;
+  transmitter.transmit(trans);
 }
