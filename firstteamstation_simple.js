@@ -15,6 +15,7 @@ function loop()
   if (count%3 === 0)
   {
     let trans=packet;
+    num += 1
     trans[20] = count%3;
     trans[21] = count%3;
     trans[22] = num;
