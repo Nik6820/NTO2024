@@ -58,6 +58,7 @@ function loop()
   let u=P+I
   if (u == minmax(u, -umax, umax)){
     I = I + err*ki*ts
+    I=I*kp
   }
   u = minmax(u, -umax, umax)
   wheels.functions[0].motor_torque = u;
