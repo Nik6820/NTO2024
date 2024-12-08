@@ -23,9 +23,8 @@ let err;
 let P;
 let u;
 // recieve
-var packet;
 var buf = new Array();
-var trans = new Uint8Array(21);
+var trans = new Uint8Array(20);
 // transmit
 var sent = 0;
 
@@ -81,12 +80,13 @@ function loop()
   coords=nav.location;
   phi=coords[0];
   lambda=coords[1]-180;
+   
   ////////// RECIEVER ///////////
-  if (Math.abs(phi-LaKyaka[0])<20 && Math.abs(lambda-LaKyaka[1])<20)
-  {
-     if (anglength(phi, LaKyaka[0], lambda, LaKyaka[1])<15.5 && buf.length < 51000 && Math.abs(ang_speed_x) < 0.0003)
+  if (buf.length < 51000)
+  { 
+     let packet = receiver.receive(23);
+     if (packet.size === 23)
      {
-        packet = receiver.receive(23);
         let sym = 0;
       
         // проверка помех в данных о пакете
@@ -96,12 +96,12 @@ function loop()
         } 
         // конец проверки
         
-        for (let i = 0; i < 21; i++) // сохраняю данные без повторов
+        for (let i = 0; i < 20; i++) // сохраняю данные без повторов
         {
            trans[i] = packet[i];
            sym = sym + packet[i];
         }
-        if (sym === trans[20]) 
+        if (sym === packet[20]) 
         {
          buf.push(trans);      
         }
