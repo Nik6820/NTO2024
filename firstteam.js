@@ -27,6 +27,7 @@ var buf = new Array();
 var trans = new Uint8Array(20);
 // transmit
 var sent = 0;
+let time;
 
 function anglength (phix, phiin, lambdax, lambdain)
 {
@@ -70,7 +71,7 @@ function loop()
   err=0-ang_speed_x;
   P=err*kp;
   u=P+I;
-  if (u == minmax(u, -umax, umax)){
+  if (u === minmax(u, -umax, umax)){
     I = I + err*ki*ts;
     I=I*kp;
   }
@@ -85,7 +86,7 @@ function loop()
   if (buf.length < 51000)
   { 
      let packet = receiver.receive(23);
-     if (packet.size === 23)
+     if (packet.length === 23)
      {
         let sym = 0;
       
@@ -101,16 +102,16 @@ function loop()
            trans[i] = packet[i];
            sym = sym + packet[i];
         }
-        if (sym%256 === packet[20]) 
+        if (sym === packet[20]) 
         {
          buf.push(trans);      
         }
      }
   }
   ///////// TRANSMITTER //////////
-     if (Math.abs(ang_speed_x) < 0.0003)
+     if (Math.abs(ang_speed_x) < 0.0003 && buf.length!==0)
      {
-        transmitter.transmit(new Uint8Array(buf[sent]));
+        transmitter.transmit(buf[sent]);
         sent=(sent+1)%buf.length;
      }
 }
