@@ -10,8 +10,8 @@ var receiver;
 let kp=-60;
 let ki=3;
 let ts=0.01;
-let LaKyaka=[-22.1023, 294.40701-180];
-let Honkong=[22.28552, 114.15769-180];
+let LaKyaka=[-22.1023, 294.40701-360];
+let Honkong=[22.28552, 114.15769];
 let coords;
 let lambda;
 let phi;
@@ -80,39 +80,48 @@ function loop()
   //end stab
   coords=nav.location;
   phi=coords[0];
-  lambda=coords[1]-180;
+  lambda=coords[1];
+  if (lambda>180){
+     lambda=lambda-360;
+  }
    
   ////////// RECIEVER ///////////
-  if (buf.length < 51000)
-  { 
-     let packet = receiver.receive(23);
-     if (packet.size === 23)
-     {
-        let sym = 0;
-      
-        // проверка помех в данных о пакете
-        if (packet[20] !== packet[21] && packet[20] !== packet[22]) 
+   if (Math.abs(phi-LaKyaka[0])<20 && Math.abs(lambda-LaKyaka[1])<20)
+  {
+     if (anglength(phi, LaKyaka[0], lambda, LaKyaka[1])<15.5 && buf.length < 51000 && Math.abs(ang_speed_x) < 0.0003)
+     { 
+        let packet = receiver.receive(23);
+        if (packet.size === 23)
         {
-          packet[20] = packet[21];
-        } 
-        // конец проверки
-        
-        for (let i = 0; i < 20; i++) // сохраняю данные без повторов
-        {
-           trans[i] = packet[i];
-           sym = sym + packet[i];
-        }
-        if (sym%256 === packet[20]) 
-        {
-         buf.push(trans);      
-        }
-     }
+           let sym = 0;
+         
+           // проверка помех в данных о пакете
+           if (packet[20] !== packet[21] && packet[20] !== packet[22]) 
+           {
+             packet[20] = packet[21];
+           } 
+           // конец проверки
+           
+           for (let i = 0; i < 20; i++) // сохраняю данные без повторов
+           {
+              trans[i] = packet[i];
+              sym = sym + packet[i];
+           }
+           if (sym%256 === packet[20]) 
+           {
+            buf.push(trans);      
+           }
+         }
+      }
   }
   ///////// TRANSMITTER //////////
-   time=spacecraft.flight_time;
-     if (Math.abs(ang_speed_x) < 0.0003 && (9600<=time<=10800 || 26520<=time<=27720) && sent<buf.length)//данные по выводам из орбиты, если по gmat, то сдвигать на минут 9 назад
+   
+  if (Math.abs(phi-Honkong[0])<20 && Math.abs(lambda-Honkong[1])<20)
+  {
+     if (anglength(phi, Honkong[0], lambda, Honkong[1])<15.5 && sent < buf.length && Math.abs(ang_speed_x) < 0.0003)
      {
         transmitter.transmit(new Uint8Array(buf[sent]));
         sent=sent+1;
      }
+   }
 }
