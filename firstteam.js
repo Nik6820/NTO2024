@@ -7,8 +7,8 @@ var nav;
 var transmitter;
 var receiver;
 //PID and coords
-let kp=-1;
-let ki=1;
+let kp=-60;
+let ki=3;
 let ts=0.01;
 let LaKyaka=[-22.1023, 294.40701-180];
 let Honkong=[22.28552, 114.15769-180];
@@ -108,12 +108,9 @@ function loop()
      }
   }
   ///////// TRANSMITTER //////////
-  if (Math.abs(phi-Honkong[0])<20 && Math.abs(lambda-Honkong[1])<20)
-  {
-     if (anglength(phi, Honkong[0], lambda, Honkong[1])<15.5 && sent < buf.length && Math.abs(ang_speed_x) < 0.0003)
+     if (Math.abs(ang_speed_x) < 0.0003)
      {
         transmitter.transmit(buf[sent]);
-        sent++;
+        sent=(sent+1)%buf.length;
      }
-  }
 }
