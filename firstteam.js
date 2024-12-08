@@ -121,7 +121,7 @@ function loop()
      if (anglength(phi, Honkong[0], lambda, Honkong[1])<15.5 && sent < buf.length && Math.abs(ang_speed_x) < 0.0003)
      {
         transmitter.transmit(new Uint8Array(buf[sent]));
-        sent=sent+1;
+        sent++;
      }
    }
 }
