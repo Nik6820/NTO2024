@@ -12,7 +12,7 @@ function loop()
 {
   let packet = receiver.receive(20);
   let sym = 0;
-  for (let i = 0, i < 20, i++) 
+  for (let i = 0; i < 20; i++) 
   {
     trans[i] = packet[i];
     sym = sym + packet[i];
