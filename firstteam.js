@@ -101,7 +101,7 @@ function loop()
            trans[i] = packet[i];
            sym = sym + packet[i];
         }
-        if (sym === packet[20]) 
+        if (sym%256 === packet[20]) 
         {
          buf.push(trans);      
         }
@@ -110,7 +110,7 @@ function loop()
   ///////// TRANSMITTER //////////
      if (Math.abs(ang_speed_x) < 0.0003)
      {
-        transmitter.transmit(buf[sent]);
+        transmitter.transmit(new Uint8Array(buf[sent]));
         sent=(sent+1)%buf.length;
      }
 }
