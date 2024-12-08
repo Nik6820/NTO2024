@@ -1,7 +1,6 @@
 'use strict';
 var transmitter;
 var receiver;
-var trans = new Uint8Array(23);
 
 function setup() 
 {
@@ -14,10 +13,9 @@ function loop()
   let sym = 0;
   for (let i = 0; i < 20; i++) 
   {
-    trans[i] = packet[i];
     sym = sym + packet[i];
   }
-  trans[20] = trans[21] = trans[22] = sym;
+  packet =[...packet, sym, sym, sym]
   
-  transmitter.transmit(trans);
+  transmitter.transmit(packet);
 }
