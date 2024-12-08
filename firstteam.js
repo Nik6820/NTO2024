@@ -71,7 +71,7 @@ function loop()
   err=0-ang_speed_x;
   P=err*kp;
   u=P+I;
-  if (u === minmax(u, -umax, umax)){
+  if (u == minmax(u, -umax, umax)){
     I = I + err*ki*ts;
     I=I*kp;
   }
@@ -86,7 +86,7 @@ function loop()
   if (buf.length < 51000)
   { 
      let packet = receiver.receive(23);
-     if (packet.length === 23)
+     if (packet.size === 23)
      {
         let sym = 0;
       
@@ -102,16 +102,17 @@ function loop()
            trans[i] = packet[i];
            sym = sym + packet[i];
         }
-        if (sym === packet[20]) 
+        if (sym%256 === packet[20]) 
         {
          buf.push(trans);      
         }
      }
   }
   ///////// TRANSMITTER //////////
-     if (Math.abs(ang_speed_x) < 0.0003 && buf.length!==0)
+   time=spacecraft.flight_time;
+     if (Math.abs(ang_speed_x) < 0.0003 && (9600<=time<=10800 || 26520<=time<=27720) && sent<buf.length)//данные по выводам из орбиты, если по gmat, то сдвигать на минут 9 назад
      {
-        transmitter.transmit(buf[sent]);
-        sent=(sent+1)%buf.length;
+        transmitter.transmit(new Uint8Array(buf[sent]));
+        sent=sent+1;
      }
 }
