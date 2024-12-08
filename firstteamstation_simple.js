@@ -11,11 +11,11 @@ function setup()
 function loop() 
 {
   let packet = receiver.receive(20);
-  let sym = 0  
+  let sym = 0;
   for (let i = 0, i < 20, i++) 
   {
     trans[i] = packet[i];
-    sym = sym + packet[i]
+    sym = sym + packet[i];
   }
   trans[20] = trans[21] = trans[22] = sym;
   
