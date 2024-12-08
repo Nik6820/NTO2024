@@ -24,10 +24,8 @@ let P;
 let u;
 // recieve
 var packet;
-var mess = [new Array(22), new Array(22), new Array(22)];
 var buf = new Array();
-var trans = new Uint8Array(22);
-var message;
+var trans = new Uint8Array(21);
 // transmit
 var sent = 0;
 
@@ -88,44 +86,24 @@ function loop()
   {
      if (anglength(phi, LaKyaka[0], lambda, LaKyaka[1])<15.5 && buf.length < 51000 && Math.abs(ang_speed_x) < 0.0003)
      {
-        packet = receiver.receive(26);
+        packet = receiver.receive(23);
+        let sym = 0;
       
         // проверка помех в данных о пакете
-        
         if (packet[20] !== packet[21] && packet[20] !== packet[22]) 
         {
           packet[20] = packet[21];
         } 
-      
-        if (packet[23] === packet[24] || packet[23] === packet[25]) 
-        {
-          packet[21] = packet[23];
-        } 
-        else
-        { 
-          packet[21] = packet[24];
-        }
         // конец проверки
         
-        for (let i = 0; i < 22; i++) // сохраняю данные без повторов
+        for (let i = 0; i < 21; i++) // сохраняю данные без повторов
         {
-          trans[i] = packet[i];
+           trans[i] = packet[i];
+           sym = sym + packet[i];
         }
-        mess[(trans[20])] = trans;
-        if (trans[20] === 3 && mess[0][21] === mess[1][21] && mess[1][21] === mess[2][21]) 
+        if (sym === trans[20]) 
         {
-          message = new Array(20);
-          for (let i = 0; i < 20; i++)
-          {
-            if (mess[0][i] === mess[1][i] || mess[0][i] === mess[2][i]) 
-            {
-              message[i] = mess[0][i];
-            } else
-            { 
-              message[i] = mess[1][i];
-            }
-            buf.push(message);
-          }        
+         buf.push(trans);      
         }
      }
   }
