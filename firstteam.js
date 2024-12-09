@@ -86,10 +86,6 @@ function loop()
   }
    
   ////////// RECIEVER ///////////
-   if (Math.abs(phi-LaKyaka[0])<20 && Math.abs(lambda-LaKyaka[1])<20)
-  {
-     if (anglength(phi, LaKyaka[0], lambda, LaKyaka[1])<15.5 && buf.length < 51000 && Math.abs(ang_speed_x) < 0.0003)
-     { 
         let packet = receiver.receive(23);
         if (packet.size === 23)
         {
@@ -112,13 +108,11 @@ function loop()
             buf.push(trans);      
            }
          }
-      }
-  }
   ///////// TRANSMITTER //////////
    
   if (Math.abs(phi-Honkong[0])<20 && Math.abs(lambda-Honkong[1])<20)
   {
-     if (anglength(phi, Honkong[0], lambda, Honkong[1])<15.5 && sent < buf.length && Math.abs(ang_speed_x) < 0.0003)
+     if (anglength(phi, Honkong[0], lambda, Honkong[1])<15 && sent < buf.length && Math.abs(ang_speed_x) < 0.0003)
      {
         transmitter.transmit(new Uint8Array(buf[sent]));
         sent++;
