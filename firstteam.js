@@ -10,11 +10,8 @@ var receiver;
 let kp=-60;
 let ki=3;
 let ts=0.01;
-let LaKyaka=[-22.1023, 294.40701-360];
-let Honkong=[22.28552, 114.15769];
-let coords;
-let lambda;
-let phi;
+//let LaKyaka=[-22.1023, 294.40701-360];
+//let Honkong=[22.28552, 114.15769];
 let umax=0.0001;
 let I=0;
 let rot_speed_x;
@@ -26,14 +23,8 @@ let u;
 var buf = new Array();
 var trans = new Uint8Array(20);
 // transmit
+let coords;
 var sent = 0;
-let time;
-
-function anglength (phix, phiin, lambdax, lambdain)
-{
-   let cos = Math.sin(phix/180*Math.PI) * Math.sin(phiin/180*Math.PI) + Math.cos(phix/180*Math.PI) * Math.cos(phiin/180*Math.PI) * Math.cos((lambdax - lambdain)/180*Math.PI);
-   return Math.acos(cos)*180/Math.PI;
-}
 
 
 function minmax (a,min,max)
@@ -78,7 +69,6 @@ function loop()
   u = minmax(u, -umax, umax);
   wheels.functions[0].motor_torque = u;
   //end stab
-  coords=nav.location;
   ////////// RECIEVER ///////////
      if (buf.length < 51000)
   { 
@@ -106,7 +96,7 @@ function loop()
          }
   }
   ///////// TRANSMITTER //////////
-   
+  coords=nav.location;
   if (Math.abs((coords[0] - 22.28552 + 360)%360) < 10 && Math.abs((coords[1] - 114.15769 + 360)%360) < 10 && sent < buf.length && Math.abs(ang_speed_x) < 0.0003)
   {
         transmitter.transmit(new Uint8Array(buf[sent]));
