@@ -15,7 +15,7 @@ function loop()
   {
     sym = sym + packet[i];
   }
-  packet =[...packet, sym, sym, sym]
+  packet =[...packet, sym, sym, sym];
   
   transmitter.transmit(new Uint8Array(packet));
 }
