@@ -79,13 +79,9 @@ function loop()
   wheels.functions[0].motor_torque = u;
   //end stab
   coords=nav.location;
-  phi=coords[0];
-  lambda=coords[1];
-  if (lambda>180){
-     lambda=lambda-360;
-  }
-   
   ////////// RECIEVER ///////////
+     if (buf.length < 51000)
+  { 
         let packet = receiver.receive(23);
         if (packet.size === 23)
         {
@@ -108,14 +104,12 @@ function loop()
             buf.push(trans);      
            }
          }
+  }
   ///////// TRANSMITTER //////////
    
-  if (Math.abs(phi-Honkong[0])<20 && Math.abs(lambda-Honkong[1])<20)
+  if (Math.abs((coords[0] - 22.28552 + 360)%360) < 10 && Math.abs((coords[1] - 114.15769 + 360)%360) < 10 && sent < buf.length && Math.abs(ang_speed_x) < 0.0003)
   {
-     if (anglength(phi, Honkong[0], lambda, Honkong[1])<15 && sent < buf.length && Math.abs(ang_speed_x) < 0.0003)
-     {
         transmitter.transmit(new Uint8Array(buf[sent]));
         sent++;
-     }
    }
 }
