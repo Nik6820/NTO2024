@@ -1,92 +1,87 @@
 'use strict';
 
- var receiver;
- var transmitter;
+function minmax (a,min,max)
+{
+    return(Math.min(Math.max(a, min), max));
+}
 
- function crc16_ccitt_false(data) {
- let crc = 0xFFFF;
- for (let i = 0; i < data.length; i++) {
- crc ^= data[i] << 8;
- for (let j = 0; j < 8; j++) {
- if (crc & 0x8000) {
- crc = (crc << 1) ^ 0x1021;
- } else {
- crc <<= 1;
- }
- }
- }
- return crc & 0xFFFF;
- }
+function anglefromgyro(highByte, lowByte) 
+{
+    let combined = (highByte << 8) | lowByte;
 
- function check_packet(data) {
- let crc = (data[data.length - 3] << 8) | data[data.length - 2];
- let calculated_crc = crc16_ccitt_false(data.slice(1, -3));
- return crc === calculated_crc;
- }
+    if (combined >= 32768) {
+        combined -= 65536;
+    }
 
- function setup() {
- receiver = spacecraft.devices[1].functions[0];
- transmitter = spacecraft.devices[0].functions[0];
- }
+    let speed = combined / 16.0;
 
- // 70 -> 310
-
- // 3920 -> 4170
-
- var received_packet = Array.from([]);
- var received = false;
-
- let kP = 0.1;
- let kI = 0.0003;
- let kD = 0.68;
- let last_error = null;
- let integral = 0;
- let tick = 0.01;
-
- function loop() {
- var gyros = spacecraft.devices[2];
- let angular_velocity = gyros.functions[0].angular_velocity;
- var pidContainer = spacecraft.devices[4].functions[0];
-
- let error = angular_velocity;
-
- let D = 0;
- if (last_error != null) {
- D = (error - last_error) / tick;
- }
- let I = error * tick;
- last_error = error;
-
- if (true || Math.abs(error) < 0.03) {
- integral = integral + kI * I;
- }
-
- var a = error * kP + D * kD + integral;
-
- var data = new Float32Array([a]);
- var byteView = new Uint8Array(data.buffer);
- pidContainer.transmit(byteView)
+    return speed/180*Math.PI;
+}
+ 
+function setup() 
+{
+  var transmitter = spacecraft.devices[0].functions[0];
+  var receiver = spacecraft.devices[1].functions[0];
+  var wheels = spacecraft.devices[4];
+  var gyros = spacecraft.devices[5];
+}
+ //PID and coords
+let kp=-60;
+let ki=3;
+let ts=0.01;
+let umax=0.0001;
+let I=0;
+let rot_speed_x;
+let ang_speed_x;
+let err;
+let P;
+let u;
+// recieve
+var buf = new Array();
 
 
- let r = Array.from(receiver.receive(200));
-
- if (r.length > 0){
- received_packet.push(...r)
- }
-
- if (spacecraft.flight_time > 3920) {
-
- if (received_packet.length > 0){
- let ebp = received_packet.indexOf(0x7b);
- let esp = received_packet.indexOf(0x7d, ebp);
- let received_packet_n = received_packet.slice(ebp, esp+1);
- received_packet.splice(0,esp+1);
- // throw Error(spacecraft.flight_time +":"+received_packet)
- if (check_packet(Array.from(received_packet_n))) {
- received_packet_n[2] = 2;
- transmitter.transmit(new Uint8Array(received_packet_n));
-
- }
- }
- }
+function loop() 
+{
+  //start stab
+  rot_speed_x = gyros.functions[0].read(2);
+  ang_speed_x = anglefromgyro(rot_speed_x[0],rot_speed_x[1]);
+  err=0-ang_speed_x;
+  P=err*kp;
+  u=P+I;
+  if (u === minmax(u, -umax, umax)){
+    I = I*kp + err*ki*ts;
+  }
+  u = minmax(u, -umax, umax);
+  wheels.functions[0].motor_torque = u;
+  //end stab
+   
+  ////////// RECIEVER ///////////
+  if (buf.length < 51000)
+  { 
+     let packet = receiver.receive(21);
+     if (packet.size === 21)
+     {
+        let sym = 0;
+        
+        for (let i = 0; i < 20; i++)
+        {
+           sym = sym + packet[i];
+        }
+        if (sym%256 === packet[20]) 
+        {
+          let er = packet.pop();
+          buf.push(packet);  
+        }
+     }
+  }
+  ///////// TRANSMITTER //////////
+     if (Math.abs(ang_speed_x) > 0.0003 || (spacecraft.flight_time>=0 && spacecraft.flight_time<9600) || (spacecraft.flight_time>10800 && spacecraft.flight_time<26520) || spacecraft.flight_time > 27720 )//данные по выводам из орбиты, если по gmat, то сдвигать на минут 9 назад
+     {
+        transmitter.disable();
+     }
+     else{
+        transmitter.enable();
+        let tr=buf.pop();
+        transmitter.transmit(new Uint8Array(tr));
+     }
 }
