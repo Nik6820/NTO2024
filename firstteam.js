@@ -23,9 +23,8 @@ let u;
 var buf = new Array();
 var trans = new Uint8Array(20);
 // transmit
-let coords;
 var sent = 0;
-
+var mail=[];
 
 function minmax (a,min,max)
 {
@@ -49,7 +48,6 @@ function setup()
 {
   transmitter = spacecraft.devices[0].functions[0];
   receiver = spacecraft.devices[1].functions[0];
-  nav = spacecraft.devices[3].functions[0];
   wheels = spacecraft.devices[4];
   gyros = spacecraft.devices[5];
 }
@@ -62,7 +60,7 @@ function loop()
   err=0-ang_speed_x;
   P=err*kp;
   u=P+I;
-  if (u == minmax(u, -umax, umax)){
+  if (u === minmax(u, -umax, umax)){
     I = I + err*ki*ts;
     I=I*kp;
   }
@@ -96,10 +94,11 @@ function loop()
          }
   }
   ///////// TRANSMITTER //////////
-  coords=nav.location;
-  if (Math.abs((coords[0] - 22.28552 + 360)%360) < 10 && Math.abs((coords[1] - 114.15769 + 360)%360) < 10 && sent < buf.length && Math.abs(ang_speed_x) < 0.0003)
+  nav = spacecraft.devices[3].functions[0];
+  let coords=nav.location;
+  if (Math.abs(coords[0] - 22.28552)  < 5 && Math.abs(coords[1] - 114.15769) < 5 && sent < buf.length && Math.abs(ang_speed_x) < 0.0003)
   {
-        transmitter.transmit(new Uint8Array(buf[sent]));
-        sent++;
+      mail=buf.pop();
+      transmitter.transmit(new Uint8Array(mail);
    }
 }
