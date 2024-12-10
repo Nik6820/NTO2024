@@ -75,7 +75,7 @@ function loop()
      }
   }
   ///////// TRANSMITTER //////////
-     if (Math.abs(ang_speed_x) > 0.0003 || (spacecraft.flight_time>=0 && spacecraft.flight_time<9600) || (spacecraft.flight_time>10800 && spacecraft.flight_time<26520) || spacecraft.flight_time > 27720 )//данные по выводам из орбиты, если по gmat, то сдвигать на минут 9 назад
+     if (Math.abs(ang_speed_x) > 0.0003 || (spacecraft.flight_time>=0 && spacecraft.flight_time<9800) || (spacecraft.flight_time>10600 && spacecraft.flight_time<26720) || spacecraft.flight_time > 27520 )//данные по выводам из орбиты, если по gmat, то сдвигать на минут 9 назад
      {
         transmitter.disable();
      }
