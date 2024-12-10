@@ -20,6 +20,9 @@ let err;
 let P;
 let u;
 // recieve
+var received_packet = Array.from([])
+var received = false
+
 var buf = new Array();
 var trans = new Uint8Array(20);
 // transmit
@@ -55,26 +58,23 @@ function setup()
 function loop() 
 {
   //start stab
-  rot_speed_x = gyros.functions[0].read(2);
-  ang_speed_x = anglefromgyro(rot_speed_x[0],rot_speed_x[1]);
-  err=0-ang_speed_x;
-  P=err*kp;
-  u=P+I;
-  if (u === minmax(u, -umax, umax)){
+    rot_speed_x = gyros.functions[0].read(2);
+    ang_speed_x = anglefromgyro(rot_speed_x[0],rot_speed_x[1]);
+    err=0-ang_speed_x;
+    P=err*kp;
+    u=P+I;
+    if (u === minmax(u, -umax, umax)){
     I = I + err*ki*ts;
     I=I*kp;
-  }
-  u = minmax(u, -umax, umax);
-  wheels.functions[0].motor_torque = u;
-  //end stab
-  ////////// RECIEVER ///////////
-     if (buf.length < 51000)
-  { 
-        let packet = receiver.receive(23);
-        if (packet.size === 23)
-        {
+    }
+    u = minmax(u, -umax, umax);
+    wheels.functions[0].motor_torque = u;
+    //end stab
+    ////////// RECIEVER ///////////
+    if (buf.length < 51000) { 
+        let r = Array.from(receiver.receive(200));
+        if (r.length > 0) {
            let sym = 0;
-         
            // проверка помех в данных о пакете
            if (packet[20] !== packet[21] && packet[20] !== packet[22]) 
            {
