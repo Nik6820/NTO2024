@@ -1,6 +1,9 @@
 'use strict';
 var transmitter;
 var receiver;
+function sumUint8Array(arr) {
+    return arr.reduce((sum, val) => sum + val, 0);
+}
 
 function setup() 
 {
@@ -9,14 +12,11 @@ function setup()
 }
 function loop() 
 {
-  let packet = Array.from(receiver.receive(20));
+  let packet = receiver.receive(20);
   if (packet.length===20)
   {
-    let sym = 0;
-    for (let i = 0; i < 20; i++) 
-    {
-      sym = sym + packet[i];
-    }
+    let sym=sumUint8Array(packet);
+    packet=Array.from(packet);
     packet.push(sym);
     transmitter.transmit(new Uint8Array(packet));
   }
