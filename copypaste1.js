@@ -17,6 +17,10 @@ function anglefromgyro(highByte, lowByte)
 
     return speed/180*Math.PI;
 }
+function sumUint8Array(arr) {
+    return arr.reduce((sum, val) => sum + val, 0);
+}
+
  
 function setup() 
 {
@@ -61,15 +65,11 @@ function loop()
      let packet = receiver.receive(21);
      if (packet.size === 21)
      {
-        let sym = 0;
+        sum=packet.pop();
+        let sym = sumUint8Array(packet);
         
-        for (let i = 0; i < 20; i++)
+        if (sym%256 == sum) 
         {
-           sym = sym + packet[i];
-        }
-        if (sym%256 === packet[20]) 
-        {
-          let er = packet.pop();
           buf.push(packet);  
         }
      }
