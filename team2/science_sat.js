@@ -72,7 +72,8 @@ function loop() {
     }
   }
   if (){//на сближение
-  
+    pack=storage.pop();//в storage одним массивом все хранится, или разделено на полученные сообщения?
+  transmitter.transmit (pack);
   
   }
 }
