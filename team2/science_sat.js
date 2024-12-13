@@ -7,6 +7,21 @@ var camera;
 var transmitter;
 var receiver;
 
+function zip(picture) {
+    let buffer = [];
+    for (var i = 0; i < 20; i++) {
+        for (var j = 0; j < 20; j++) {
+            let a1=picture[j*2+i*80];
+            let a2=picture[j*2+i*80+1];
+            let a3=picture[j*2+i*80+40];
+            let a4=picture[j*2+i*80+41];
+            buffer.push(Math.round((a1+a2+a3+a4)/4));
+        }
+    }
+
+    return new Uint8Array(buffer);
+}
+
 function floatToBytes32LittleEndian(floatValue) {
     const buffer = new ArrayBuffer(4);
     const view = new DataView(buffer);
@@ -78,7 +93,6 @@ function loop() {
     let angle = calculateSunDirection(vec_sens[0],vec_sens[1]);
     if (180-angle<=15){
       pic=camera.read(1600);
-      //сжатие фото
       zippic = zip(pic);
       angle32=floatToBytes32LittleEndian(angle);
       let data = new Uint8Array([...zippic, ...angle32]);
