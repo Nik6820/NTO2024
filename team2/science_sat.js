@@ -7,8 +7,30 @@ var camera;
 var transmitter;
 var receiver;
 
+function floatToBytes32LittleEndian(floatValue) {
+    const buffer = new ArrayBuffer(4);
+    const view = new DataView(buffer);
 
+    // Записываем значение float в little-endian формат
+    view.setFloat32(0, floatValue, true); // true для little-endian
 
+    // Возвращаем массив из 4 байт
+    return new Uint8Array(view.buffer);
+}
+function read(sensorData) {
+    // Проверяем, что входной параметр n соответствует ожидаемому размеру
+    // Создаем новый DataView из Uint8Array
+    const view = new DataView(sensorData.buffer);
+
+    // Читаем первые 8 байт (координату X) в little-endian формате
+    const x = view.getInt32(0, true);
+
+    // Читаем последние 8 байт (координату Y) в little-endian формате
+    const y = view.getInt32(8, true);
+
+    // Возвращаем результат как массив из двух чисел
+    return [x, y];
+}
 function calculateSunDirection(xPixel, yPixel) {
     if (xPixel === -1 && yPixel === -1) {
       return [0, 0, 0]; 
@@ -40,12 +62,6 @@ function calculateSunDirection(xPixel, yPixel) {
   }
 
 
-  //Debug
-  //const xPixel = 117;
-  //const yPixel = 351;
-  //const sunDirection = calculateSunDirection(xPixel, yPixel);
-  //console.log("Вектор направления на Солнце:", sunDirection);
-  //console.log("Угол с Oz:", anglesensor(sunDirection))
 
 function setup() {
     transmitter = spacecraft.devices[0].functions[0];
@@ -56,17 +72,15 @@ function setup() {
 }
  
 function loop() {    
-    let data_sensor=sun_sensor.read(16);
-  // перевод из сырых данных в норм
-  // let vec_sens=Arr8toint64
+  let data_sensor=new Uint8Array(sun_sensor.read(16));
+  let vec_sens=read(data_sensor);
   if (vec_sens[0]!==-1 && vec_sens[1]!==-1){
     let angle = calculateSunDirection(vec_sens[0],vec_sens[1]);
     if (180-angle<=15){
       pic=camera.read(1600);
       //сжатие фото
       zippic = zip(pic);
-      //перевод угла в FLOAT32
-      angle32=todataangle(angle);
+      angle32=floatToBytes32LittleEndian(angle);
       let data = new Uint8Array([...zippic, ...angle32]);
       storage.write(data);
     }
