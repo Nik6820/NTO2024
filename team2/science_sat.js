@@ -22,7 +22,7 @@ function zip(picture) {
     return new Uint8Array(buffer);
 }
 
-function floatToBytes32LittleEndian(floatValue) {
+function tofloat32(floatValue) {
     const buffer = new ArrayBuffer(4);
     const view = new DataView(buffer);
 
@@ -32,7 +32,7 @@ function floatToBytes32LittleEndian(floatValue) {
     // Возвращаем массив из 4 байт
     return new Uint8Array(view.buffer);
 }
-function read(sensorData) {
+function toint32(sensorData) {
     // Проверяем, что входной параметр n соответствует ожидаемому размеру
     // Создаем новый DataView из Uint8Array
     const view = new DataView(sensorData.buffer);
@@ -88,13 +88,13 @@ function setup() {
  
 function loop() {    
   let data_sensor=new Uint8Array(sun_sensor.read(16));
-  let vec_sens=read(data_sensor);
+  let vec_sens=toint32(data_sensor);
   if (vec_sens[0]!==-1 && vec_sens[1]!==-1){
     let angle = calculateSunDirection(vec_sens[0],vec_sens[1]);
     if (180-angle<=15){
       pic=camera.read(1600);
       zippic = zip(pic);
-      angle32=floatToBytes32LittleEndian(angle);
+      angle32=tofloat32(angle);
       let data = new Uint8Array([...zippic, ...angle32]);
       storage.write(data);
     }
