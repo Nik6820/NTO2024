@@ -47,9 +47,6 @@ function toint32(sensorData) {
     return [x, y];
 }
 function calculateSunDirection(xPixel, yPixel) {
-    if (xPixel === -1 && yPixel === -1) {
-      return [0, 0, 0]; 
-    }
     const WidthMM = 22.3;
     const HeightMM = 14.9;
     const SizeMM = 0.025;
