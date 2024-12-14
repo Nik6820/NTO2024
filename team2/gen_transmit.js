@@ -27,7 +27,7 @@ function loop()
 {
     let received = new Uint8Array(receiver.receive(80));
     buffer = buffer.concat(bitsToBytes(received));
-    let packet = new Uint8Array(buffer.splice(0,10))
+    let packet = new Uint8Array(buffer.splice(0,10))//параша с количеством бит
     transmitter.transmit(encode(packet));
 }
 
@@ -58,9 +58,9 @@ function setup()
 }
 function loop() 
 {
-  let received = new Uint8Array(receiver.receive(80));
+  let received = new Uint8Array(receiver.receive(80));//параша с количеством
   let decoded = decode(received);
-  buffer = buffer.concat(bitsToBytes(decoded));
+  buffer = buffer.concat(bitsToBytes(decoded));//конкатенация массивов в фотку
   transmitter.transmit(new Uint8Array(buffer.splice(0,10)));
 }
 
