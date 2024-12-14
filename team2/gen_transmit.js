@@ -26,7 +26,7 @@ function loop()
   let received = new Uint8Array(receiver.receive(80)); // в научном тут штука с камеры))))
   // let decoded = decode(received);
   // let packet = bitsToBytes(decoded);
-  buf = buf.concat(bitsToBytes(received));
+  buffer = buffer.concat(bitsToBytes(received));
   transmitter.transmit(new Uint8Array(buffer.splice(0,10)));
 }
 
@@ -63,6 +63,6 @@ function loop()
 {
   let received = new Uint8Array(receiver.receive(80)); // в научном тут штука с камеры))))
   let decoded = decode(received);
-  buf = buf.concat(bitsToBytes(decoded));
+  buffer = buffer.concat(bitsToBytes(decoded));
   transmitter.transmit(new Uint8Array(buffer.splice(0,10)));
 }
