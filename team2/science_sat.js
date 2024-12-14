@@ -84,10 +84,10 @@ function loop() {
       pic=camera.read(1600);
       zippic = zip(pic);
       angle32=tofloat32(angle);
-      let data = new Uint8Array([...zippic, ...angle32]);
+      let data = new Uint8Array([...zippic, ...angle32]);//  нуно разобраться можно ли так делать
       storage.write(data);
       //кодировка массив
-      packets.push(encode(data));
+      packets.push(encode(data));// "Мб убрать", - Татьяна
     }
   }
   if (){//на сближение
