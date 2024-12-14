@@ -86,7 +86,7 @@ function loop() {
       angle32=tofloat32(angle);
       let data = new Uint8Array([...zippic, ...angle32]);//  нуно разобраться можно ли так делать
       storage.write(data);
-      packets.push(data);// "че по формату", - Татьяна
+      packets.push(zippic);// "че по формату", - Татьяна
     }
   }
   if (){//на сближение
