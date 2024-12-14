@@ -65,7 +65,7 @@ function loop()
 }
 
 
-// ретранслятор
+// бабааааах
 'use strict';
 
 function bitsToBytes(bits) {
