@@ -46,7 +46,7 @@ function encode(bytes) {
     // encode
 }
 
-function bitsToBytes(bits) {
+function decode(bits) {
     // decode
 }
 
