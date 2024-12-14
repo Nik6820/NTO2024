@@ -51,20 +51,12 @@ function calculateSunDirection(xPixel, yPixel) {
     const HeightMM = 14.9;
     const SizeMM = 0.025;
     const Z = 5; 
-  
 
     const xCentreMM = xPixel * SizeMM - HeightMM/2;
     const yCentreMM = yPixel * SizeMM - WidthMM/2;
-  
-  
 
     const distance = Math.sqrt(xCentreMM * xCentreMM + yCentreMM * yCentreMM + Z * Z);
     
-    if (distance === 0) {
-      return [0, 0, 0];
-    }
-  
-
     const x = xCentreMM / distance;
     const y = yCentreMM / distance;
     const z = -Z / distance;
