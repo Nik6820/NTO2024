@@ -85,7 +85,7 @@ function setup() {
     sun_sensor = spacecraft.devices[3].functions[0];
     storage = spacecraft.devices[4].functions[0];    
 }
- 
+let packets=[];
 function loop() {    
   let data_sensor=new Uint8Array(sun_sensor.read(16));
   let vec_sens=toint32(data_sensor);
@@ -97,11 +97,13 @@ function loop() {
       angle32=tofloat32(angle);
       let data = new Uint8Array([...zippic, ...angle32]);
       storage.write(data);
+      //кодировка массив
+      packets.push(encode(data));
     }
   }
   if (){//на сближение
-    pack=storage.pop();//в storage одним массивом все хранится, или разделено на полученные сообщения?
-  transmitter.transmit (pack);
+    pack=data.pop();
+    transmitter.transmit(pack);
   
   }
 }
