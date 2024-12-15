@@ -98,3 +98,47 @@ function gf_poly_eval(poly, x){
   }
   return y
 }
+
+
+
+//encoding
+function rs_generator_poly(nsym){ //nsym - the number of error correction symbols, n-k usually
+  let g = [1];
+  for(let i = 0;i < nsym;i++){
+    g = gf_poly_mul(g, [1, gf_pow(2, i)]);
+  }
+  return g;
+}
+
+function gf_poly_div(dividend, divisor){
+  let msg_out = [...dividend];
+  for (let i = 0; i < dividend.length-divisor.length-1; i++){
+    let coef = msg_out[i];
+    if (coef !== 0){
+      for (let j = 0; j < divisor.length; j++){
+        if (divisor[j] !== 0){
+          msg_out[i + j] = msg_out[i + j]^gf_mul(divisor[j], coef);
+        }
+      }
+    }
+  }
+  let separator=1-divisor.length;
+  return [msg_out.slice(0, separator), msg_out.slice(separator)];
+}
+
+function rs_encode_msg(msg_in, nsym) {
+    let gen = rs_generator_poly(nsym);
+    let msg_out = new Array(msg_in.length + gen.length - 1).fill(0);
+    msg_out.splice(0, msg_in.length, ...msg_in);
+    for (let i = 0; i < msg_in.length; i++) {
+        let coef = msg_out[i];
+        if (coef !== 0) {
+            for (let j = 1; j < gen.length; j++) {
+                msg_out[i + j] = msg_out[i + j]^gf_mul(gen[j], coef); 
+            }
+        }
+    }
+
+    msg_out.splice(0, msg_in.length, ...msg_in);
+    return msg_out;
+}
