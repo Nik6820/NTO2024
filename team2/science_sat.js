@@ -74,7 +74,13 @@ function setup() {
 }
 
 let photos = new Array();
-function loop() {    
+const time1 = 1800;
+const time2 = 4500;
+const per = 2*3600 +4*60 +20;
+
+function loop() {
+    let time = spacecraft.flight_time;
+    if (time%per>time1 && time%per<time2){
     let data_sensor = new Uint8Array(sun_sensor.read(16));
     let vec_sens = toint32(data_sensor);
     if (vec_sens[0] !== -1 && vec_sens[1] !== -1){
@@ -88,8 +94,6 @@ function loop() {
         photos.push(zippic); // -- по формату Uint8Array
     }
     }
-    if (/*на сближение*/){
-        transmitter.transmit(photos.pop()); // Все за раз)) 
     }
 }
 
