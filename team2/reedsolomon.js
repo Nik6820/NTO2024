@@ -39,14 +39,14 @@ function init_tables(prim = 0x11d) {
 }
 
 function gf_mul(x,y){
-  if (x===0 || y===0){
+  if (x==0 || y==0){
     return 0;
   }
   return gf_exp[(gf_log[x]+gf_log[y])%255];
 }
 
 function gf_div(x,y){
-  if (x===0){
+  if (x==0){
     return 0;
   }
   return gf_exp[(gf_log[x] + 255 - gf_log[y]) % 255];
@@ -114,9 +114,9 @@ function gf_poly_div(dividend, divisor){
   let msg_out = [...dividend];
   for (let i = 0; i < dividend.length-divisor.length-1; i++){
     let coef = msg_out[i];
-    if (coef !== 0){
+    if (coef != 0){
       for (let j = 0; j < divisor.length; j++){
-        if (divisor[j] !== 0){
+        if (divisor[j] != 0){
           msg_out[i + j] = msg_out[i + j]^gf_mul(divisor[j], coef);
         }
       }
@@ -132,7 +132,7 @@ function rs_encode_msg(msg_in, nsym) {
     msg_out.splice(0, msg_in.length, ...msg_in);
     for (let i = 0; i < msg_in.length; i++) {
         let coef = msg_out[i];
-        if (coef !== 0) {
+        if (coef != 0) {
             for (let j = 1; j < gen.length; j++) {
                 msg_out[i + j] = msg_out[i + j]^gf_mul(gen[j], coef); 
             }
@@ -203,7 +203,7 @@ function rs_correct_errata(msg_in, synd, err_pos){
       let err_loc_prime_tmp = [];
   
       for (let j = 0; j < Xlength; j++) {
-          if (j !== i) {
+          if (j != i) {
               err_loc_prime_tmp.push(gf_sub(1, gf_mul(Xi_inv, X[j])));
           }
       }
@@ -214,7 +214,7 @@ function rs_correct_errata(msg_in, synd, err_pos){
       }
       let y = gf_poly_eval(err_eval.reverse(), Xi_inv);
       y = gf_mul(gf_pow(Xi, 1), y);
-      if (err_loc_prime === 0){
+      if (err_loc_prime == 0){
         return 0;
       }
       let magnitude = gf_div(y, err_loc_prime);
@@ -249,7 +249,7 @@ function rs_find_error_locator(synd, nsym, erase_loc = null, erase_count = 0) {
     // Shift polynomials to compute the next degree
     old_loc.push(0);
     
-    if (delta !== 0) {
+    if (delta != 0) {
         if (old_loc.length > err_loc.length) {
             let new_loc = gf_poly_scale(old_loc, delta);
             old_loc = gf_poly_scale(err_loc, gf_inverse(delta));
@@ -259,7 +259,7 @@ function rs_find_error_locator(synd, nsym, erase_loc = null, erase_count = 0) {
         err_loc = gf_poly_add(err_loc, gf_poly_scale(old_loc, delta));
     }
   }
-  while (err_loc.length > 0 && err_loc[0] === 0) { 
+  while (err_loc.length > 0 && err_loc[0] == 0) { 
     err_loc.shift(); 
   }
   let errs = err_loc.length -1;
@@ -273,11 +273,11 @@ function rs_find_errors(err_loc, nmess) { // nmess is len(msg_in)
     let errs = err_loc.length - 1;
     const err_pos = [];
     for (let i = 0; i < nmess; i++) {
-        if (gf_poly_eval(err_loc, gf_pow(2, i)) === 0) {
+        if (gf_poly_eval(err_loc, gf_pow(2, i)) == 0) {
             err_pos.push(nmess - 1 - i);
         }
     }
-    if (err_pos.length !== errs) {
+    if (err_pos.length != errs) {
         return [0];    }
     return err_pos;
 }
@@ -305,7 +305,7 @@ function rs_correct_msg(msg_in, nsym, erase_pos = null) {
     // }
 
     let msg_out = [...msg_in];
-    if (erase_pos === null) {
+    if (erase_pos == null) {
         erase_pos = [];
     } 
     else {
@@ -319,14 +319,14 @@ function rs_correct_msg(msg_in, nsym, erase_pos = null) {
     }
     let synd = rs_calc_syndromes(msg_out, nsym);
 
-    if (Math.max(...synd) === 0) {
+    if (Math.max(...synd) == 0) {
         return [msg_out.slice(0, -nsym), msg_out.slice(-nsym)];
     }
 
     let fsynd = rs_forney_syndromes(synd, erase_pos, msg_out.length);
     let err_loc = rs_find_error_locator(fsynd, nsym, erase_pos.length);
     let err_pos = rs_find_errors(err_loc.reverse(), msg_out.length);
-    if (err_pos === null) {
+    if (err_pos == null) {
         return [0, 0];
     }
 
