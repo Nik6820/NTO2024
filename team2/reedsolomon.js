@@ -142,3 +142,30 @@ function rs_encode_msg(msg_in, nsym) {
     msg_out.splice(0, msg_in.length, ...msg_in);
     return msg_out;
 }
+
+
+
+//decode
+function rs_calc_syndromes(msg, nsym){
+  let synd = new Array(nsym).fill(0);
+  for (let i = 0; i < nsym; i++){
+    synd[i] = gf_poly_eval(msg, gf_pow(2,i));
+  }
+  return [0].concat(synd);
+}
+
+function rs_check(msg, nsym){
+  let fiction = rs_calc_syndromes(msg, nsym));
+  let max=0;
+  for (let i=0; i<fiction.length; i++){
+    if (fiction[i]>max){
+      max=fiction[i];
+    }
+  }
+  if (max==0){
+    return 1;
+  }
+  else{
+    return 0;
+  }
+}
