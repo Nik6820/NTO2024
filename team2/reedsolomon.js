@@ -123,7 +123,7 @@ function gf_poly_div(dividend, divisor){
     }
   }
   let separator=1-divisor.length;
-  return [msg_out.slice(0, separator), msg_out.slice(separator)];
+  return msg_out.slice(separator);
 }
 
 function rs_encode_msg(msg_in, nsym) {
@@ -169,3 +169,58 @@ function rs_check(msg, nsym){
     return 0;
   }
 }
+
+function rs_find_errata_locator(e_pos){
+  let e_loc=[1];
+  for (let i=0; i<e_pos.length; i++){
+    e_loc = gf_poly_mul( e_loc, gf_poly_add([1], [gf_pow(2, e_pos[i]), 0]) );
+  }
+  return e_loc;
+}
+
+function rs_find_error_evaluator(synd, err_loc, nsym){
+    let remainder = gf_poly_div( gf_poly_mul(synd, err_loc), ([1] + [0]*(nsym+1)) );
+    return remainder;
+}
+
+function rs_correct_errata(msg_in, synd, err_pos){
+  let coef_pos = new Array(err_pos.length);
+  for (let i=0; i<err_pos.length; i++){
+    coef_pos[i]=msg_in.length - 1 - err_pos[i];
+  }
+  let err_loc = rs_find_errata_locator(coef_pos);
+  let err_eval = rs_find_error_evaluator(synd.reverse(), err_loc, err_loc.length - 1).reverse();
+  x=[];
+  for (let i=0; i < coef_pos.length; i++){
+    let l=255-coef_pos[i];
+    x.push(gf_pow(2, -l));
+  }
+  let E = new Array(msg_in.length).fill(0); // will store the values that need to be corrected (subtracted) to the message containing errors
+  let Xlength = X.length;
+  for (let i = 0; i < Xlength; i++) {
+      let Xi = X[i];
+      let Xi_inv = gf_inverse(Xi);
+      let err_loc_prime_tmp = [];
+  
+      for (let j = 0; j < Xlength; j++) {
+          if (j !== i) {
+              err_loc_prime_tmp.push(gf_sub(1, gf_mul(Xi_inv, X[j])));
+          }
+      }
+      let err_loc_prime = 1;
+      for (let k =0; k<err_loc_prime_tmp.length; k++) {
+          let coef = err_loc_prime_tmp[k];
+          err_loc_prime = gf_mul(err_loc_prime, coef);
+      }
+      let y = gf_poly_eval(err_eval.reverse(), Xi_inv);
+      y = gf_mul(gf_pow(Xi, 1), y);
+      if (err_loc_prime === 0){
+        return 0;
+      }
+      let magnitude = gf_div(y, err_loc_prime);
+      E[err_pos[i]] = magnitude;
+  }
+  msg_in=gf_poly_add(msg_in, E);
+  return msg_in;
+}
+
