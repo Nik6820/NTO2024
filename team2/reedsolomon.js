@@ -284,7 +284,7 @@ function rs_find_errors(err_loc, nmess) { // nmess is len(msg_in)
 
 //correction
 
-function rsForneySyndromes(synd, pos, nmess) {
+function rs_forney_syndromes(synd, pos, nmess) {
   let erase_pos_reversed  = new Array(pos.length);
   for (let p=0; p<pos.length; p++){
     erase_pos_reversed[p]=nmess - 1 - pos[i];
