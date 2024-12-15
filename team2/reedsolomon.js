@@ -281,3 +281,60 @@ function rs_find_errors(err_loc, nmess) { // nmess is len(msg_in)
         return [0];    }
     return err_pos;
 }
+
+//correction
+
+function rsForneySyndromes(synd, pos, nmess) {
+  let erase_pos_reversed  = new Array(pos.length);
+  for (let p=0; p<pos.length; p++){
+    erase_pos_reversed[p]=nmess - 1 - pos[i];
+  }
+  let fsynd = synd.slice(1); 
+  for (let i = 0; i < pos.length; i++) {
+      let x = gf_pow(2, erase_pos_reversed[i]);
+      for (let j = 0; j < fsynd.length - 1; j++) {
+          fsynd[j] = gf_mul(fsynd[j], x) ^ fsynd[j + 1];
+      }
+  }
+  return fsynd;
+}
+
+function rs_correct_msg(msg_in, nsym, erase_pos = null) {
+    // if (msg_in.length > 255) {
+    //     throw new Error(`Message is too long (${msg_in.length} when max is 255)`);
+    // }
+
+    let msg_out = [...msg_in];
+    if (erase_pos === null) {
+        erase_pos = [];
+    } 
+    else {
+        for (let r=0; r<erase_pos.length;r++) {
+          let epos = erase_pos[r];
+          msg_out[e_pos] = 0;
+        }
+    }
+    if (erase_pos.length > nsym){
+      return [0, 0];
+    }
+    let synd = rs_calc_syndromes(msg_out, nsym);
+
+    if (Math.max(...synd) === 0) {
+        return [msg_out.slice(0, -nsym), msg_out.slice(-nsym)];
+    }
+
+    let fsynd = rs_forney_syndromes(synd, erase_pos, msg_out.length);
+    let err_loc = rs_find_error_locator(fsynd, nsym, erase_pos.length);
+    let err_pos = rs_find_errors(err_loc.reverse(), msg_out.length);
+    if (err_pos === null) {
+        return [0, 0];
+    }
+
+    msg_out = rs_correct_errata(msg_out, synd, erase_pos.concat(err_pos));
+    synd = rs_calc_syndromes(msg_out, nsym);
+    if (Math.max(...synd) > 0) {
+        return [0, 0];
+    }
+
+    return [msg_out.slice(0, -nsym), msg_out.slice(-nsym)];
+}
