@@ -21,8 +21,8 @@ function gf_mult_noLUT(x, y, prim = 0, field_charac_full = 256, carryless = true
     return r;
 }
 
-let gf_exp = new Array(256).fill(0);
-let gf_log = new Array(256).fill(0);
+var gf_exp = new Array(256).fill(0);
+var gf_log = new Array(256).fill(0);
 
 function init_tables(prim = 0x11d) {
     gf_exp = new Array(512).fill(0); // anti-log (exponential) table
@@ -52,8 +52,12 @@ function gf_div(x,y){
   return gf_exp[(gf_log[x] + 255 - gf_log[y]) % 255];
 }
 
+function gf_revpow(x, power){
+  return gf_exp[255 + (gf_log[x] * power) % 255]
+}
+
 function gf_pow(x, power){
-  return gf_exp[(gf_log[x] * power) % 255];
+  return gf_exp[(gf_log[x] * power) % 255]
 }
 
 function gf_inverse(x){
@@ -112,7 +116,7 @@ function rs_generator_poly(nsym){ //nsym - the number of error correction symbol
 
 function gf_poly_div(dividend, divisor){
   let msg_out = [...dividend];
-  for (let i = 0; i < dividend.length-divisor.length-1; i++){
+  for (let i = 0; i < dividend.length-divisor.length+1; i++){
     let coef = msg_out[i];
     if (coef != 0){
       for (let j = 0; j < divisor.length; j++){
@@ -179,7 +183,7 @@ function rs_find_errata_locator(e_pos){
 }
 
 function rs_find_error_evaluator(synd, err_loc, nsym){
-    let remainder = gf_poly_div( gf_poly_mul(synd, err_loc), ([1] + [0]*(nsym+1)) );
+    let remainder = gf_poly_div( gf_poly_mul(synd, err_loc), [1].concat(new Array(nsym+1).fill(0)) );
     return remainder;
 }
 
@@ -192,32 +196,33 @@ function rs_correct_errata(msg_in, synd, err_pos){
   let err_eval = rs_find_error_evaluator(synd.reverse(), err_loc, err_loc.length - 1).reverse();
   X=[];
   for (let i=0; i < coef_pos.length; i++){
-    let l=255-coef_pos[i];
-    X.push(gf_pow(2, -l));
+    var l=255-coef_pos[i];
+    X.push(gf_revpow(2, -l));
   }
   let E = new Array(msg_in.length).fill(0); // will store the values that need to be corrected (subtracted) to the message containing errors
   let Xlength = X.length;
   for (let i = 0; i < Xlength; i++) {
-      let Xi = X[i];
-      let Xi_inv = gf_inverse(Xi);
-      let err_loc_prime_tmp = [];
+      var Xi = X[i];
+      const Xi_inv = gf_inverse(Xi);
+      var err_loc_prime_tmp = [];
   
       for (let j = 0; j < Xlength; j++) {
           if (j != i) {
               err_loc_prime_tmp.push(gf_sub(1, gf_mul(Xi_inv, X[j])));
           }
       }
-      let err_loc_prime = 1;
+    
+      var err_loc_prime = 1;
       for (let k =0; k<err_loc_prime_tmp.length; k++) {
-          let coef = err_loc_prime_tmp[k];
+          const coef = err_loc_prime_tmp[k];
           err_loc_prime = gf_mul(err_loc_prime, coef);
       }
-      let y = gf_poly_eval(err_eval.reverse(), Xi_inv);
-      y = gf_mul(gf_pow(Xi, 1), y);
+      let u = gf_poly_eval(err_eval.reverse(), Xi_inv);
+      u = gf_mul(gf_pow(Xi, 1), u);
       if (err_loc_prime == 0){
         return 0;
       }
-      let magnitude = gf_div(y, err_loc_prime);
+      var magnitude = gf_div(u, err_loc_prime);
       E[err_pos[i]] = magnitude;
   }
   msg_in=gf_poly_add(msg_in, E);
@@ -244,7 +249,7 @@ function rs_find_error_locator(synd, nsym, erase_loc = null, erase_count = 0) {
 
     delta = synd[K];
     for (let j = 1; j < err_loc.length; j++) {
-        delta = delta ^ gf_mul(err_loc[- (j + 1)], synd[K - j]);
+        delta = delta ^ gf_mul(err_loc[err_loc.length - (j + 1)], synd[K - j]);
     } 
     // Shift polynomials to compute the next degree
     old_loc.push(0);
@@ -252,7 +257,7 @@ function rs_find_error_locator(synd, nsym, erase_loc = null, erase_count = 0) {
         if (old_loc.length > err_loc.length) {
             let new_loc = gf_poly_scale(old_loc, delta);
             old_loc = gf_poly_scale(err_loc, gf_inverse(delta));
-            err_loc = new_loc;
+            err_loc = [...new_loc];
         }
         
         err_loc = gf_poly_add(err_loc, gf_poly_scale(old_loc, delta));
@@ -328,10 +333,9 @@ function rs_correct_msg(msg_in, nsym, erase_pos = null) {
     if (err_pos == null) {
         return [0, 0];
     }
-
     msg_out = rs_correct_errata(msg_out, synd, erase_pos.concat(err_pos));
+    return msg_out
     synd = rs_calc_syndromes(msg_out, nsym);
-    
     if (Math.max(...synd) > 0) {
         return [0, 0];
     }
@@ -339,8 +343,14 @@ function rs_correct_msg(msg_in, nsym, erase_pos = null) {
     return [msg_out.slice(0, -nsym), msg_out.slice(-nsym)];
 }
 
-prim = 0x11d
-init_tables(prim) 
-data = [220,68,87,0,7,5];
-data1 = rs_encode_msg(data, 2);
-console.log(rs_correct_msg(data1, 2));
+// prim = 0x11d
+// init_tables(prim) 
+// data = [220,68,87,0,7,5,4,2,225,58];
+// data1 = rs_encode_msg(data, 20);
+// data1[6]=102
+// data1[3]=102
+// data1[1]=0
+// data1[8]=52
+// data2 = rs_correct_msg(data1, 20);
+// console.log(rs_correct_msg(data2, 20))
+
