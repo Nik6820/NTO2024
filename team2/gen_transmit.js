@@ -16,6 +16,7 @@ function bitsToBytes(bits) {
 var transmitter;
 var receiver;
 var buf = new Array()
+var time = 0
 
 function setup() 
 {
@@ -27,10 +28,11 @@ function loop()
 {
     let received = new Uint8Array(receiver.receive(80));
     buf = buf.concat(bitsToBytes(received));
-    let packet = new Uint8Array(buf.splice(0,10)) //количество! зависит от кода (хемминг/РС) (и от ответа орбитных уродов) (когда уже придет неизбежный конец)
-    transmitter.transmit(encode(packet));
+    if (buf.length >= 3200) { // мб проверка времени - зависит от орбиты
+        let packet = encode(buf.splice(0,400)) 
+        transmitter.transmit(bitsToBytes(packet));
+    }
 }
-
 
 /////////////////// станция /////////////////////
 'use strict';
