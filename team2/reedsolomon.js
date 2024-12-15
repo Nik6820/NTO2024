@@ -224,3 +224,60 @@ function rs_correct_errata(msg_in, synd, err_pos){
   return msg_in;
 }
 
+function rs_find_error_locator(synd, nsym, erase_loc = null, erase_count = 0) {  
+  if (erase_loc) { // if the erasure locator polynomial is supplied, we init with its value, so that we include erasures in the final locator polynomial
+    err_loc = [...erase_loc];
+    old_loc = [...erase_loc];
+  } 
+  else {
+    err_loc = [1];
+    old_loc = [1];
+  }
+  let synd_shift = synd.length - nsym;
+  for (let i=0; i<nsym-erase_count; i++){
+    if (erase_loc) { 
+      K = erase_count + i + synd_shift;
+    } 
+    else { // if erasures locator is not provided, then either there's no erasures to account or we use the Forney syndromes, so we don't need to use erase_count nor erase_loc 
+      K = i + synd_shift;
+    }
+
+    delta = synd[K];
+    for (let j = 1; j < err_loc.length; j++) {
+        delta = delta ^ gf_mul(err_loc[- (j + 1)], synd[K - j]);
+    } 
+    // Shift polynomials to compute the next degree
+    old_loc.push(0);
+    
+    if (delta !== 0) {
+        if (old_loc.length > err_loc.length) {
+            let new_loc = gf_poly_scale(old_loc, delta);
+            old_loc = gf_poly_scale(err_loc, gf_inverse(delta));
+            err_loc = new_loc;
+        }
+        
+        err_loc = gf_poly_add(err_loc, gf_poly_scale(old_loc, delta));
+    }
+  }
+  while (err_loc.length > 0 && err_loc[0] === 0) { 
+    err_loc.shift(); 
+  }
+  let errs = err_loc.length -1;
+  if ((errs-erase_count) * 2 + erase_count > nsym){
+      return [0];
+  }
+  return err_loc;
+}
+
+function rs_find_errors(err_loc, nmess) { // nmess is len(msg_in)
+    let errs = err_loc.length - 1;
+    const err_pos = [];
+    for (let i = 0; i < nmess; i++) {
+        if (gf_poly_eval(err_loc, gf_pow(2, i)) === 0) {
+            err_pos.push(nmess - 1 - i);
+        }
+    }
+    if (err_pos.length !== errs) {
+        return [0];    }
+    return err_pos;
+}
