@@ -93,7 +93,7 @@ function gf_poly_mul(p,q){
 
 function gf_poly_eval(poly, x){
   let y = poly[0];
-  for (let i=0; i<poly.length;i++){
+  for (let i=1; i<poly.length;i++){
       y = gf_mul(y, x) ^ poly[i];
   }
   return y
