@@ -193,7 +193,7 @@ function rs_correct_errata(msg_in, synd, err_pos){
   x=[];
   for (let i=0; i < coef_pos.length; i++){
     let l=255-coef_pos[i];
-    x.push(gf_pow(2, -l));
+    X.push(gf_pow(2, -l));
   }
   let E = new Array(msg_in.length).fill(0); // will store the values that need to be corrected (subtracted) to the message containing errors
   let Xlength = X.length;
