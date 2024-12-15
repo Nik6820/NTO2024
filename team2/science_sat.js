@@ -8,8 +8,8 @@ var transmitter;
 
 function zip(picture) {
     let buffer = new ArrayBuffer();
-    for (var i = 0; i < 20; i++) {
-        for (var j = 0; j < 20; j++) {
+    for (let i = 0; i < 20; i++) {
+        for (let j = 0; j < 20; j++) {
             let a1 = picture[j*2+i*80];
             let a2 = picture[j*2+i*80+1];
             let a3 = picture[j*2+i*80+40];
@@ -85,12 +85,11 @@ function loop() {
         angle32 = tofloat32(angle);
         let data = new Uint8Array([...zippic, ...angle32]);
         storage.write(data);
-        photos.push(zippic); // "че по формату", - Татьяна -- по формату Uint8Array
+        photos.push(zippic); // -- по формату Uint8Array
     }
     }
-    if (){//на сближение
+    if (/*на сближение*/){
         transmitter.transmit(photos.pop()); // !!ЕСЛИ МОЖНО ЗА РАЗ 400 БАЙТ
-  
-  }
+    }
 }
 
