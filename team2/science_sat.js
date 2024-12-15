@@ -89,7 +89,7 @@ function loop() {
     }
     }
     if (/*на сближение*/){
-        transmitter.transmit(photos.pop()); // Все за раз))
+        transmitter.transmit(photos.pop()); // Все за раз)) 
     }
 }
 
