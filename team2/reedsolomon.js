@@ -155,7 +155,7 @@ function rs_calc_syndromes(msg, nsym){
 }
 
 function rs_check(msg, nsym){
-  let fiction = rs_calc_syndromes(msg, nsym));
+  let fiction = rs_calc_syndromes(msg, nsym);
   let max=0;
   for (let i=0; i<fiction.length; i++){
     if (fiction[i]>max){
