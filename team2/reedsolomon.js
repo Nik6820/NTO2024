@@ -262,7 +262,6 @@ function rs_find_error_locator(synd, nsym, erase_loc = null, erase_count = 0) {
   while (err_loc.length && err_loc[0] === 0){ 
     err_loc.shift(); 
   }
-    return err_loc;
   let errs = err_loc.length -1;
   if ((errs-erase_count) * 2 + erase_count > nsym){
       return [0];
@@ -325,7 +324,6 @@ function rs_correct_msg(msg_in, nsym, erase_pos = null) {
 
     let fsynd = rs_forney_syndromes(synd, erase_pos, msg_out.length);
     let err_loc = rs_find_error_locator(fsynd, nsym, erase_pos.length);
-    return err_loc
     let err_pos = rs_find_errors(err_loc.reverse(), msg_out.length);
     if (err_pos == null) {
         return [0, 0];
@@ -340,3 +338,9 @@ function rs_correct_msg(msg_in, nsym, erase_pos = null) {
 
     return [msg_out.slice(0, -nsym), msg_out.slice(-nsym)];
 }
+
+prim = 0x11d
+init_tables(prim) 
+data = [220,68,87,0,7,5];
+data1 = rs_encode_msg(data, 2);
+console.log(rs_correct_msg(data1, 2));
