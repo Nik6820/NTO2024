@@ -15,7 +15,7 @@ function bitsToBytes(bits) {
 
 var transmitter;
 var receiver;
-var buffer = new Array()
+var buf = new Array()
 
 function setup() 
 {
@@ -26,8 +26,8 @@ function setup()
 function loop() 
 {
     let received = new Uint8Array(receiver.receive(80));
-    buffer = buffer.concat(bitsToBytes(received));
-    let packet = new Uint8Array(buffer.splice(0,10))//параша с количеством бит
+    buf = buf.concat(bitsToBytes(received));
+    let packet = new Uint8Array(buf.splice(0,10))//параша с количеством бит
     transmitter.transmit(encode(packet));
 }
 
@@ -49,7 +49,7 @@ function decode(bits) {
 
 var transmitter;
 var receiver;
-var buffer = new Array()
+var buf = new Array()
 
 function setup() 
 {
@@ -60,8 +60,8 @@ function loop()
 {
   let received = new Uint8Array(receiver.receive(80));//параша с количеством
   let decoded = decode(received);
-  buffer = buffer.concat(bitsToBytes(decoded));//конкатенация массивов в фотку
-  transmitter.transmit(new Uint8Array(buffer.splice(0,10)));
+  buf = buf.concat(bitsToBytes(decoded));//конкатенация массивов в фотку
+  transmitter.transmit(new Uint8Array(buf.splice(0,10)));
 }
 
 
@@ -79,7 +79,7 @@ function bitsToBytes(bits) {
 var transmitter;
 var receiver;
 // var storage;
-var buffer = new Array()
+var buf = new Array()
 
 function setup() 
 {
@@ -91,6 +91,6 @@ function setup()
 function loop() 
 {
   let received = new Uint8Array(receiver.receive(80)); // в научном тут штука с камеры))))
-  buffer = buffer.concat(bitsToBytes(received));
-  transmitter.transmit(new Uint8Array(buffer.splice(0,10)));
+  buf = buf.concat(bitsToBytes(received));
+  transmitter.transmit(new Uint8Array(buf.splice(0,10)));
 }
