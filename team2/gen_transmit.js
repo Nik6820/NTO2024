@@ -2,7 +2,7 @@
 'use strict';
 
 function encode(bytes) {
-    // encode
+    // encode - РС или Хемминг
 }
 
 function bitsToBytes(bits) {
@@ -19,15 +19,15 @@ var buf = new Array()
 
 function setup() 
 {
-  transmitter = spacecraft.devices[0].functions[0];
-  receiver = spacecraft.devices[1].functions[0];
+    transmitter = spacecraft.devices[0].functions[0];
+    receiver = spacecraft.devices[1].functions[0];
 }
 
 function loop() 
 {
     let received = new Uint8Array(receiver.receive(80));
     buf = buf.concat(bitsToBytes(received));
-    let packet = new Uint8Array(buf.splice(0,10))//параша с количеством бит
+    let packet = new Uint8Array(buf.splice(0,10)) //количество! зависит от кода (хемминг/РС) (и от ответа орбитных уродов) (когда уже придет неизбежный конец)
     transmitter.transmit(encode(packet));
 }
 
@@ -44,7 +44,7 @@ function bitsToBytes(bits) {
 }
 
 function decode(bits) {
-    // decode
+    // decode - если РС, аргумент поменять на байты!
 }
 
 var transmitter;
@@ -53,44 +53,33 @@ var buf = new Array()
 
 function setup() 
 {
-  transmitter = spacecraft.devices[0].functions[0];
-  receiver = spacecraft.devices[1].functions[0];
+    transmitter = spacecraft.devices[0].functions[0];
+    receiver = spacecraft.devices[1].functions[0];
 }
+
 function loop() 
 {
-  let received = new Uint8Array(receiver.receive(80));//параша с количеством
-  let decoded = decode(received);
-  buf = buf.concat(bitsToBytes(decoded));//конкатенация массивов в фотку
-  transmitter.transmit(new Uint8Array(buf.splice(0,10)));
+    let received = new Uint8Array(receiver.receive(80)); //количество! зависит от кода (хемминг/РС)
+    let decoded = decode(received);
+    buf = buf.concat(bitsToBytes(decoded)); //конкатенация массивов в фотку, если там РС - убрать битс ту байтс
+    transmitter.transmit(new Uint8Array(buf.splice(0,10))); // мы в очке?? В зависимости от ответа орбиты выводим разное. Мб 400 байт за раз.
 }
 
 
-// бабааааах
+// ScienceSat
 'use strict';
 
-function bitsToBytes(bits) {
-    let byteArray = new Array(Math.ceil(bits.length / 8));
-    for (let i = 0; i < bits.length; i++) {
-        byteArray[Math.floor(i / 8)] |= bits[i] << (7 - (i % 8));
-    }
-    return byteArray;
-}
-
 var transmitter;
-var receiver;
-// var storage;
 var buf = new Array()
 
 function setup() 
 {
-  transmitter = spacecraft.devices[0].functions[0];
-  receiver = spacecraft.devices[1].functions[0];
-  // storage = spacecraft.devices[4].functions[0];
+    transmitter = spacecraft.devices[0].functions[0];
 }
 
 function loop() 
 {
-  let received = new Uint8Array(receiver.receive(80)); // в научном тут штука с камеры))))
-  buf = buf.concat(bitsToBytes(received));
-  transmitter.transmit(new Uint8Array(buf.splice(0,10)));
+    let received = new Uint8Array(receiver.receive(80)); // в научном тут штука с камеры))))
+    buf = buf.concat(bitsToBytes(received));
+    transmitter.transmit(new Uint8Array(buf.splice(0,10)));
 }
