@@ -190,7 +190,7 @@ function rs_correct_errata(msg_in, synd, err_pos){
   }
   let err_loc = rs_find_errata_locator(coef_pos);
   let err_eval = rs_find_error_evaluator(synd.reverse(), err_loc, err_loc.length - 1).reverse();
-  x=[];
+  X=[];
   for (let i=0; i < coef_pos.length; i++){
     let l=255-coef_pos[i];
     X.push(gf_pow(2, -l));
