@@ -8,7 +8,7 @@ var transmitter;
 var receiver;
 
 function zip(picture) {
-    let buffer = [];
+    let buffer = new ArrayBuffer();
     for (var i = 0; i < 20; i++) {
         for (var j = 0; j < 20; j++) {
             let a1=picture[j*2+i*80];
@@ -86,7 +86,7 @@ function loop() {
       angle32=tofloat32(angle);
       let data = new Uint8Array([...zippic, ...angle32]);
       storage.write(data);
-      packets.push(zippic);// "че по формату", - Татьяна
+      packets.push(zippic); // "че по формату", - Татьяна -- по формату Uint8Array
     }
   }
   if (){//на сближение
