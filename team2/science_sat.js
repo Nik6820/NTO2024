@@ -89,7 +89,7 @@ function loop() {
     }
     }
     if (/*на сближение*/){
-        transmitter.transmit(photos.pop()); // !!ЕСЛИ МОЖНО ЗА РАЗ 400 БАЙТ
+        transmitter.transmit(photos.pop()); // Все за раз))
     }
 }
 
