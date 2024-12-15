@@ -236,7 +236,7 @@ function rs_find_error_locator(synd, nsym, erase_loc = null, erase_count = 0) {
   let synd_shift = synd.length - nsym;
   for (let i=0; i<nsym-erase_count; i++){
     if (erase_loc) { 
-      K = erase_count + i + synd_shift;
+      let K = erase_count + i + synd_shift;
     } 
     else { // if erasures locator is not provided, then either there's no erasures to account or we use the Forney syndromes, so we don't need to use erase_count nor erase_loc 
       K = i + synd_shift;
@@ -248,7 +248,6 @@ function rs_find_error_locator(synd, nsym, erase_loc = null, erase_count = 0) {
     } 
     // Shift polynomials to compute the next degree
     old_loc.push(0);
-    
     if (delta != 0) {
         if (old_loc.length > err_loc.length) {
             let new_loc = gf_poly_scale(old_loc, delta);
@@ -259,9 +258,11 @@ function rs_find_error_locator(synd, nsym, erase_loc = null, erase_count = 0) {
         err_loc = gf_poly_add(err_loc, gf_poly_scale(old_loc, delta));
     }
   }
-  while (err_loc.length > 0 && err_loc[0] == 0) { 
+
+  while (err_loc.length && err_loc[0] === 0){ 
     err_loc.shift(); 
   }
+    return err_loc;
   let errs = err_loc.length -1;
   if ((errs-erase_count) * 2 + erase_count > nsym){
       return [0];
@@ -318,13 +319,13 @@ function rs_correct_msg(msg_in, nsym, erase_pos = null) {
       return [0, 0];
     }
     let synd = rs_calc_syndromes(msg_out, nsym);
-
     if (Math.max(...synd) == 0) {
         return [msg_out.slice(0, -nsym), msg_out.slice(-nsym)];
     }
 
     let fsynd = rs_forney_syndromes(synd, erase_pos, msg_out.length);
     let err_loc = rs_find_error_locator(fsynd, nsym, erase_pos.length);
+    return err_loc
     let err_pos = rs_find_errors(err_loc.reverse(), msg_out.length);
     if (err_pos == null) {
         return [0, 0];
@@ -332,6 +333,7 @@ function rs_correct_msg(msg_in, nsym, erase_pos = null) {
 
     msg_out = rs_correct_errata(msg_out, synd, erase_pos.concat(err_pos));
     synd = rs_calc_syndromes(msg_out, nsym);
+    
     if (Math.max(...synd) > 0) {
         return [0, 0];
     }
