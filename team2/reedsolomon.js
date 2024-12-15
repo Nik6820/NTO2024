@@ -73,10 +73,10 @@ function gf_poly_scale(p,x){
 function gf_poly_add(p,q){
   let r = new Array(Math.max(p.length,q.length)).fill(0);
   for (let i=0; i<p.length;i++){
-        r[i+len(r)-len(p)] = p[i];
+        r[i+r.length-p.length] = p[i];
   }
   for (let i=0; i<q.length;i++){
-        r[i+len(r)-len(q)] = r[i+len(r)-len(q)]^q[i];
+        r[i+r.length-q.length] = r[i+r.length-q.length]^q[i];
   }
   return r
 }
