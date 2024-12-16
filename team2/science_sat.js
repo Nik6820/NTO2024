@@ -78,6 +78,8 @@ let photos = new Array();
 const time1 = 1800;
 const time2 = 4500;
 const per = 2*3600 +4*60 +20;
+var times = [[21395, 22825], [43225б 44450], [65305, 65920]]; 
+let count = 0;
 
 function loop() {
     let time = spacecraft.flight_time;
@@ -96,14 +98,22 @@ function loop() {
             }
         }
     }
-    if (time > time1 && time <time2) {
-        count += 1
-        if count*symbs/100 < (time2-time1) {
-            transmitter.transmit([127, 255, ...photos.pop())
+
+    let trans = false;
+    for (let i = 0; i < 3; i++) {
+        if (time > times[i][0] && time < times[i][1]) {
+            trans = times[i][1] - times[i][0]
+            break
+        }
+    }  
+    if (trans) {
+        count += 1;
+        if (count*401/100 < trans) {
+            transmitter.transmit([127, 127, 127, 127, 127, 127, 127, 127, 127, 127, ...photos.pop()]);
         }
     }
     else {
-        count = 0
+        count = 0;
     }
 }
 
