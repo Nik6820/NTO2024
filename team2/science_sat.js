@@ -78,7 +78,7 @@ let photos = new Array();
 const time1 = 1800;
 const time2 = 4500;
 const per = 2*3600 +4*60 +20;
-var times = [[21395, 22825], [43225б 44450], [65305, 65920]]; 
+var times = [[21395, 22825], [43225, 44450], [65305, 65920]]; 
 let count = 0;
 
 function loop() {
