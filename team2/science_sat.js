@@ -85,16 +85,18 @@ function loop() {
     let time = spacecraft.flight_time;
     if (time%per>time1 && time%per<time2){
         let data_sensor = new Uint8Array(sun_sensor.read(16));
-        let vec_sens = toint32(data_sensor);
-        if (vec_sens[0] != -1 && vec_sens[1] != -1){
-            let angle = calculateSunDirection(vec_sens[0],vec_sens[1]);
-            if (angle <= 15){
-                pic = camera.read(1600);
-                zippic = zip(pic); // сжатая картинка камеры
-                angle32 = tofloat32(angle);
-                let data = new Uint8Array([...zippic, ...angle32]);
-                storage.write(data);
-                photos.push(zippic); // -- по формату Uint8Array
+        if (data_sensor.length>0){
+            let vec_sens = toint32(data_sensor);
+            if (vec_sens[0] != -1 && vec_sens[1] != -1){
+                let angle = calculateSunDirection(vec_sens[0],vec_sens[1]);
+                if (angle <= 15){
+                    pic = camera.read(1600);
+                    zippic = zip(pic); // сжатая картинка камеры
+                    angle32 = tofloat32(angle);
+                    let data = new Uint8Array([...zippic, ...angle32]);
+                    storage.write(data);
+                    photos.push(zippic); // -- по формату Uint8Array
+                }
             }
         }
     }
