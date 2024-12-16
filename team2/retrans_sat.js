@@ -18,6 +18,8 @@ var transmitter;
 var receiver;
 var buf = new Array()
 var desynch = true
+var times = [[39679, 39929], [45305, 45669], [51009, 51382], [56724, 57090], [62454, 62736], [479, 783], [6195, 6486], [29499, 29740], [35171, 35502], [8797, 9167], [37837, 38188], [43639, 43771]] 
+
 
 function setup() 
 {
@@ -29,10 +31,25 @@ function loop()
 {
     let received = new Uint8Array(receiver.receive(80));
     buf = buf.concat(bitsToBytes(received));
-    if (buf.length >= 3207) { // мб проверка времени - жду ответа
-        let packet = encode(buf.splice(0,400)) 
-        transmitter.transmit(bitsToBytes(packet));
+    
+    let trans = false
+    for (let i = 0; i < 12; i++) {
+        if (time > times[i][0] && time < times[i][1]) {
+            trans = times[i][1] - times[i][0]
+            break
+        }
+    }  
+    if (trans) {
+        count += 1
+        if (buf.length >= 3207 && count*symbs/100 < trans) {
+            let packet = encode(buf.splice(0,400), nsym) // мб сначала надо будет найти старт сообщения
+            transmitter.transmit(bitsToBytes(packet));
+        }
     }
+    else {
+        count = 0
+    }
+
 }
 
 /////////////////// станция /////////////////////
