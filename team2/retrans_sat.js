@@ -395,7 +395,7 @@ function loop()
             let ind = buf.length-3200
             for (let i = 0; i<ind+1; i++) {
                 if (bitsToBytes(buf.slice(i, i+80)).join() == [127, 127, 127, 127, 127, 127, 127, 127, 127, 127].join()) {
-                    ind = 80
+                    ind = i
                     break
                 }
             }
