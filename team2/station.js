@@ -1,10 +1,6 @@
 /////////////////// станция /////////////////////
 'use strict';
 
-// ретранслятор
-'use strict';
-
-
 function gf_add(x, y){
     return x^y;
 }
@@ -407,8 +403,8 @@ function loop()
             buf.splice(0,80);
             prim = 0x11d;
             init_tables(prim); 
-            let packet = bitsToBytes(buf.splice(0,4000)); // мб сначала надо будет найти старт сообщения
-            transmitter.transmit(rs_correct_msg(packet);
+            let packet = bitsToBytes(buf.splice(0,3920)); // мб сначала надо будет найти старт сообщения
+            transmitter.transmit(rs_correct_msg(packet.splice(0, 245), 45).concat(rs_correct_msg(packet.splice(0, 245), 45)));
         }
     }
 
