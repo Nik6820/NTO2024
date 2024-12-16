@@ -60,7 +60,7 @@ function calculateSunDirection(xPixel, yPixel) {
     
     const x = xCentreMM / distance;
     const y = yCentreMM / distance;
-    const z = -Z / distance;
+    const z = Z / distance;
   
     //return [x.toFixed(3) * 1, y.toFixed(3) * 1, z.toFixed(3) * 1];
     return Math.acos(z)*180/Math.PI;
@@ -88,7 +88,7 @@ function loop() {
         let vec_sens = toint32(data_sensor);
         if (vec_sens[0] != -1 && vec_sens[1] != -1){
             let angle = calculateSunDirection(vec_sens[0],vec_sens[1]);
-            if (180-angle <= 15){
+            if (angle <= 15){
                 pic = camera.read(1600);
                 zippic = zip(pic); // сжатая картинка камеры
                 angle32 = tofloat32(angle);
