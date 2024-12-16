@@ -403,10 +403,10 @@ function loop()
                 init_tables(prim); 
                 let packet = bitsToBytes(buf.splice(0,3200)); // мб сначала надо будет найти старт сообщения
                 transmitter.transmit((rs_encode_msg([127, 127, 127, 127, 127], 5)).concat(rs_encode_msg(packet.splice(0, 200), 45), rs_encode_msg(packet.splice(0, 200), 45)));
+            }
         }
     }
     else {
         count = 0
     }
-
 }
