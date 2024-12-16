@@ -351,8 +351,6 @@ function rs_correct_msg(msg_in, nsym, erase_pos = null) {
 }
 
 
-var nsym = 50 // количество символов на кодировку
-
 function bitsToBytes(bits) {
     let byteArray = new Array(Math.ceil(bits.length / 8));
     for (let i = 0; i < bits.length; i++) {
@@ -364,7 +362,6 @@ function bitsToBytes(bits) {
 var transmitter;
 var receiver;
 var buf = new Array();
-var desynch = true;
 var times = [[39679, 39929], [45305, 45669], [51009, 51382], [56724, 57090], [62454, 62736], [29499, 29740], [35171, 35502], [37837, 38188], [43639, 43771]]; 
 let count = 0;
 
