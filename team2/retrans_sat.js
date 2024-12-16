@@ -326,32 +326,32 @@ function rs_correct_msg(msg_in, nsym, erase_pos = null) {
         }
     }
     if (erase_pos.length > nsym){
-        return [0, 0];
+        return [0];
     }
     let synd = rs_calc_syndromes(msg_out, nsym);
     //   console.log('synd1: ', synd)
     if (Math.max(...synd) == 0) {
-        return [msg_out.slice(0, -nsym), msg_out.slice(-nsym)];
+        return msg_out.slice(0, -nsym);
     }
     
     let fsynd = rs_forney_syndromes(synd, erase_pos, msg_out.length);
     let err_loc = rs_find_error_locator(fsynd, nsym, erase_pos.length);
     let err_pos = rs_find_errors(err_loc.reverse(), msg_out.length);
     if (err_pos == null) {
-        return [0, 0];
+        return [0];
     }
     msg_out = rs_correct_errata(msg_out, synd, erase_pos.concat(err_pos));
     synd = rs_calc_syndromes(msg_out, nsym);
 
     if (Math.max(...synd) > 0) {
-        return [0, 0];
+        return [0];
     }
     
     return /*[*/msg_out.slice(0, -nsym)/*, msg_out.slice(-nsym)]*/;
 }
 
 
-var nsym = 50 = 0 // количество символов на кодировку
+var nsym = 50 // количество символов на кодировку
 
 function bitsToBytes(bits) {
     let byteArray = new Array(Math.ceil(bits.length / 8));
@@ -363,10 +363,10 @@ function bitsToBytes(bits) {
 
 var transmitter;
 var receiver;
-var buf = new Array()
-var desynch = true
-var times = [[39679, 39929], [45305, 45669], [51009, 51382], [56724, 57090], [62454, 62736], [479, 783], [6195, 6486], [29499, 29740], [35171, 35502], [8797, 9167], [37837, 38188], [43639, 43771]] 
-
+var buf = new Array();
+var desynch = true;
+var times = [[39679, 39929], [45305, 45669], [51009, 51382], [56724, 57090], [62454, 62736], [479, 783], [6195, 6486], [29499, 29740], [35171, 35502], [8797, 9167], [37837, 38188], [43639, 43771]]; 
+let count = 0;
 
 function setup() 
 {
@@ -379,7 +379,8 @@ function loop()
     let received = new Uint8Array(receiver.receive(80));
     buf = buf.concat(bitsToBytes(received));
     
-    let trans = false
+    let trans = false;
+    let time = spacecraft.flight_time;
     for (let i = 0; i < 12; i++) {
         if (time > times[i][0] && time < times[i][1]) {
             trans = times[i][1] - times[i][0]
@@ -389,8 +390,10 @@ function loop()
     if (trans) {
         count += 1
         if (buf.length >= 3207 && count*symbs/100 < trans) {
-            let packet = encode(buf.splice(0,400), nsym) // мб сначала надо будет найти старт сообщения
-            transmitter.transmit(bitsToBytes(packet));
+            prim = 0x11d
+            init_tables(prim) 
+            let packet = bitsToBytes(buf.splice(0,400)) // мб сначала надо будет найти старт сообщения
+            transmitter.transmit((rs_encode_msg([127, 127, 127, 127, 127], 5)).concat(rs_encode_msg(packet.splice(0, 200), 45), rs_encode_msg(packet.splice(0, 200), 45)));
         }
     }
     else {
