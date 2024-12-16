@@ -376,10 +376,16 @@ function setup()
 
 function loop() 
 {
+    let time = spacecraft.flight_time;
+    if ((time > 21390 && time < 22830) || (time > 43225 && time < 44450)) {
+        receiver.enable()
+    }
+    else {
+        receiver.disable()
+    }
     buf = buf.concat(receiver.receive(80));
     
     let trans = false;
-    let time = spacecraft.flight_time;
     for (let i = 0; i < 9; i++) {
         if (time > times[i][0] && time < times[i][1]) {
             trans = times[i][1] - times[i][0]
