@@ -78,7 +78,7 @@ let photos = new Array();
 const time1 = 1800;
 const time2 = 4500;
 const per = 2*3600 +4*60 +20;
-var times = [[21395, 22825], [43225, 44450], [65305, 65920]]; 
+var times = [[21395, 22825], [43225, 44450]]; 
 let count = 0;
 
 function loop() {
@@ -100,7 +100,7 @@ function loop() {
     }
 
     let trans = false;
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 2; i++) {
         if (time > times[i][0] && time < times[i][1]) {
             trans = times[i][1] - times[i][0]
             break
