@@ -365,7 +365,7 @@ var transmitter;
 var receiver;
 var buf = new Array();
 var desynch = true;
-var times = [[39679, 39929], [45305, 45669], [51009, 51382], [56724, 57090], [62454, 62736], [479, 783], [6195, 6486], [29499, 29740], [35171, 35502], [8797, 9167], [37837, 38188], [43639, 43771]]; 
+var times = [[39679, 39929], [45305, 45669], [51009, 51382], [56724, 57090], [62454, 62736], [29499, 29740], [35171, 35502], [37837, 38188], [43639, 43771]]; 
 let count = 0;
 
 function setup() 
@@ -376,12 +376,11 @@ function setup()
 
 function loop() 
 {
-    let received = new Uint8Array(receiver.receive(80));
-    buf = buf.concat(bitsToBytes(received));
+    buf = buf.concat(receiver.receive(80));
     
     let trans = false;
     let time = spacecraft.flight_time;
-    for (let i = 0; i < 12; i++) {
+    for (let i = 0; i < 9; i++) {
         if (time > times[i][0] && time < times[i][1]) {
             trans = times[i][1] - times[i][0]
             break
@@ -389,11 +388,21 @@ function loop()
     }  
     if (trans) {
         count += 1
-        if (buf.length >= 3207 && count*symbs/100 < trans) {
-            prim = 0x11d
-            init_tables(prim) 
-            let packet = bitsToBytes(buf.splice(0,400)) // мб сначала надо будет найти старт сообщения
-            transmitter.transmit((rs_encode_msg([127, 127, 127, 127, 127], 5)).concat(rs_encode_msg(packet.splice(0, 200), 45), rs_encode_msg(packet.splice(0, 200), 45)));
+        if (buf.length >= 3280 && count*410/100 < trans) {
+            let ind = buf.length-3200
+            for (let i = 0; i<ind; i++) {
+                if (bitsToBytes(buf.slice(i, i+80)).join() == [127, 127, 127, 127, 127, 127, 127, 127, 127, 127].join()) {
+                    ind = 80
+                    break
+                }
+            }
+            buf.splice(0, ind)
+            if (buf.length >= 3280): {
+                buf.splice(0,80);
+                prim = 0x11d;
+                init_tables(prim); 
+                let packet = bitsToBytes(buf.splice(0,3200)); // мб сначала надо будет найти старт сообщения
+                transmitter.transmit((rs_encode_msg([127, 127, 127, 127, 127], 5)).concat(rs_encode_msg(packet.splice(0, 200), 45), rs_encode_msg(packet.splice(0, 200), 45)));
         }
     }
     else {
