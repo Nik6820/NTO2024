@@ -89,7 +89,7 @@ function loop() {
             let vec_sens = toint32(data_sensor);
             if (vec_sens[0] != -1 && vec_sens[1] != -1){
                 let angle = calculateSunDirection(vec_sens[0],vec_sens[1]);
-                if (angle <= 15){
+                if (angle <= 30){
                     pic = camera.read(1600);
                     zippic = zip(pic); // сжатая картинка камеры
                     angle32 = tofloat32(angle);
