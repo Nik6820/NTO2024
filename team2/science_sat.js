@@ -5,6 +5,7 @@ var storage;
 var sun_sensor;
 var camera;
 var transmitter;
+let count == 0;
 
 function zip(picture) {
     let buffer = new ArrayBuffer();
@@ -95,7 +96,14 @@ function loop() {
             }
         }
     }
-    if (/* рядом ретранслятор, мб время прошлой отправки */) {
-        transmitter.transmit(photos.pop())
+    if (time > time1 && time <time2) {
+        count += 1
+        if count*symbs/100 < (time2-time1) {
+            transmitter.transmit([127, 255, ...photos.pop())
+        }
+    }
+    else {
+        count = 0
+    }
 }
 
