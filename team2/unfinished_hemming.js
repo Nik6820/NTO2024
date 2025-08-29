@@ -1,4 +1,4 @@
-console.log("по-моему я занимаюсь какой-то хуйней")
+console.log("bob")
 
 function encode(bit_mess) {
     let outPut = new Int8Array(bit_mess.length*12/8);
